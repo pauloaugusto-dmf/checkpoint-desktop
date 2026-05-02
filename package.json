@@ -1,6 +1,6 @@
 {
   "name": "checkpoint-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gerenciador de bibliotecas de jogos",
   "main": "src/main/main.js",
   "scripts": {

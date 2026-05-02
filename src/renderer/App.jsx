@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search } from 'lucide-react';
+import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles } from 'lucide-react';
 import { platforms } from './js/platforms';
 import TitleBar from './components/TitleBar';
 import NavItem from './components/NavItem';
@@ -10,6 +10,8 @@ import DayDetailsModal from './components/DayDetailsModal';
 import GameDetailsModal from './components/GameDetailsModal';
 import CalendarView from './components/CalendarView';
 import SettingsView from './components/SettingsView';
+import ReleaseNotesModal from './components/ReleaseNotesModal';
+import { releaseNotes } from './js/releaseNotes';
 
 export default function App() {
   const [jogos, setJogos] = useState([]);
@@ -30,6 +32,7 @@ export default function App() {
   const [currentTheme, setCurrentTheme] = useState('violet');
   const [displayMode, setDisplayMode] = useState('dark'); // 'dark' or 'light'
   const [iconStyle, setIconStyle] = useState('status'); // 'monochrome', 'accent', 'status'
+  const [isReleaseNotesOpen, setIsReleaseNotesOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('checkpoint-theme') || 'violet';
@@ -43,6 +46,14 @@ export default function App() {
     applyTheme(savedTheme);
     applyDisplayMode(savedDisplayMode);
     carregarDados();
+
+    // Verifica atualização de versão para mostrar Novidades
+    const lastVersion = localStorage.getItem('checkpoint-last-version');
+    const currentVersion = releaseNotes[0].version;
+    if (lastVersion !== currentVersion) {
+      setIsReleaseNotesOpen(true);
+      localStorage.setItem('checkpoint-last-version', currentVersion);
+    }
   }, []);
 
   const themes = {
@@ -294,6 +305,14 @@ export default function App() {
             colorClass={getIconColorClass('Calendário')}
           />
           <NavItem 
+            icon={<Sparkles className="w-5 h-5" />} 
+            label="Novidades" 
+            active={false} 
+            onClick={() => setIsReleaseNotesOpen(true)} 
+            isCollapsed={isSidebarCollapsed}
+            colorClass="text-emerald-500"
+          />
+          <NavItem 
             icon={menuIcons['Configurações']} 
             label="Configurações" 
             active={activeFilter === 'Configurações'} 
@@ -478,6 +497,10 @@ export default function App() {
           icon={statusIcons[editingJogo.status]}
           iconColorClass={getIconColorClass(editingJogo.status)}
         />
+      )}
+
+      {isReleaseNotesOpen && (
+        <ReleaseNotesModal onClose={() => setIsReleaseNotesOpen(false)} />
       )}
       </div>
     </div>
