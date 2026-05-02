@@ -1,0 +1,20 @@
+export const platforms = [
+  { id: 'PC', name: 'PC', color: '#000000', bgColor: '#a3a3a3' },
+  { id: 'PlayStation 5', name: 'PlayStation 5', color: '#ffffff', bgColor: '#00439c' },
+  { id: 'PlayStation 4', name: 'PlayStation 4', color: '#ffffff', bgColor: '#003791' },
+  { id: 'PlayStation 3', name: 'PlayStation 3', color: '#ffffff', bgColor: '#000000' },
+  { id: 'PS Vita', name: 'PS Vita', color: '#ffffff', bgColor: '#003791' },
+  { id: 'PSP', name: 'PSP', color: '#ffffff', bgColor: '#000000' },
+  { id: 'Xbox Series X|S', name: 'Xbox Series X|S', color: '#ffffff', bgColor: '#107c10' },
+  { id: 'Xbox One', name: 'Xbox One', color: '#ffffff', bgColor: '#107c10' },
+  { id: 'Xbox 360', name: 'Xbox 360', color: '#107c10', bgColor: '#ffffff' },
+  { id: 'Nintendo Switch 2', name: 'Nintendo Switch 2', color: '#ffffff', bgColor: '#e60012' },
+  { id: 'Nintendo Switch', name: 'Nintendo Switch', color: '#ffffff', bgColor: '#e60012' },
+  { id: 'Wii U', name: 'Wii U', color: '#ffffff', bgColor: '#008bcf' },
+  { id: 'Nintendo Wii', name: 'Nintendo Wii', color: '#8b8b8b', bgColor: '#ffffff' },
+  { id: 'Nintendo 3DS', name: 'Nintendo 3DS', color: '#ffffff', bgColor: '#ce181e' },
+  { id: 'Nintendo DS', name: 'Nintendo DS', color: '#ffffff', bgColor: '#0071ce' },
+  { id: 'Game Boy Advance', name: 'Game Boy Advance', color: '#ffffff', bgColor: '#5a228b' },
+  { id: 'iOS', name: 'iOS', color: '#ffffff', bgColor: '#000000' },
+  { id: 'Android', name: 'Android', color: '#ffffff', bgColor: '#3DDC84' }
+];
