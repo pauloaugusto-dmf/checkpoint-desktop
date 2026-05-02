@@ -45,11 +45,47 @@ O Checkpoint foi estruturado seguindo rigorosamente as melhores práticas de Eng
 2. **Context Isolation**: O Electron roda com `nodeIntegration: false` e `contextIsolation: true`. Toda a comunicação entre o React e o Node.js/Banco de Dados ocorre via eventos seguros IPC definidos no `src/preload/index.js` (ContextBridge).
 3. **SQL Injection Prevention**: O sistema utiliza *Prepared Statements* puros em todas as operações de banco de dados (`src/main/sqlite.js`), impedindo injeções maliciosas.
 
-## 📦 Como Empacotar (Build)
+## 📦 Como Empacotar (Build) para Windows
 
-*(Nota: Ferramentas de empacotamento como electron-builder estão sendo configuradas para gerar os executáveis `.exe`, `.dmg` e `.AppImage` em atualizações futuras)*
+O projeto utiliza o **electron-builder** para compilar o executável e o **node-gyp** para compilar as dependências nativas (como o `sqlite3` em C++). 
 
-No momento, o comando básico de compilação da interface é:
-```bash
-npm run build
+### ⚠️ Aviso para usuários de WSL (Linux no Windows)
+Não realize o build do projeto diretamente de dentro do WSL. A compilação do `sqlite3` exige compiladores nativos do sistema alvo. Para gerar o `.exe`, **utilize o terminal nativo do Windows** (PowerShell ou CMD).
+
+### Pré-requisitos de Compilação (Windows)
+Certifique-se de que o seu ambiente Windows possua:
+1. **Node.js** instalado nativamente.
+2. **Visual Studio Build Tools**: Durante a instalação (ou modificando no Visual Studio Installer), certifique-se de instalar:
+   - *Desenvolvimento para Desktop com C++ (Desktop development with C++)*
+   - *Windows 10/11 SDK* (obrigatório para compilar módulos nativos).
+
+### Comandos de Build
+Após clonar o repositório em uma pasta nativa do Windows (ex: `C:\Projetos`), execute:
+```cmd
+npm install
+npm run build:win
 ```
+O executável final (`Checkpoint Setup 1.0.0.exe`) será gerado dentro da pasta `release`.
+
+---
+
+## 🛡️ Solução de Problemas: Windows Smart App Control
+
+No Windows 11, o **Controle de Aplicativos Inteligente (Smart App Control)** bloqueia por padrão a execução de instaladores que não possuam um Certificado Digital pago emitido por uma Autoridade Confiável (como a DigiCert).
+
+Se o instalador for bloqueado após o build e você não possuir um certificado, você pode gerar um certificado autoassinado localmente para uso pessoal ou de desenvolvimento, forçando o seu Windows a confiar no seu próprio executável:
+
+**Abra o PowerShell como Administrador e execute:**
+```powershell
+# 1. Cria um Certificado Digital Local de Desenvolvedor e o injeta nas raízes confiáveis da sua máquina
+$cert = New-SelfSignedCertificate -Type Custom -Subject "CN=Checkpoint Developer" -KeyUsage DigitalSignature -FriendlyName "CheckpointCert" -CertStoreLocation "Cert:\CurrentUser\My" -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
+
+$store = Get-Item "Cert:\LocalMachine\Root"
+$store.Open("ReadWrite")
+$store.Add($cert)
+$store.Close()
+
+# 2. Assina o executável do Checkpoint com o seu novo certificado
+Set-AuthenticodeSignature -FilePath ".\release\Checkpoint Setup 1.0.0.exe" -Certificate $cert
+```
+Após executar esses comandos, o Windows passará a reconhecer o aplicativo como confiável em sua máquina e o bloqueio será removido.
