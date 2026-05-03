@@ -21,6 +21,7 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     percentual_conclusao: initialData?.percentual_conclusao || 0,
     data_lancamento: initialData?.data_lancamento || '',
     capa_caminho: initialData?.capa_caminho || '',
+    banner_caminho: initialData?.banner_caminho || '',
     tempo_horas: Math.floor((initialData?.tempo_jogo_minutos || 0) / 60),
     tempo_minutos: (initialData?.tempo_jogo_minutos || 0) % 60
   });
@@ -222,8 +223,13 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-txt-muted mb-1">URL da Imagem da Capa (Opcional)</label>
-              <input type="text" name="capa_caminho" value={formData.capa_caminho} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="https://exemplo.com/capa.jpg" />
+              <label className="block text-sm font-medium text-txt-muted mb-1">URL da Imagem da Capa (Vertical)</label>
+              <input type="text" name="capa_caminho" value={formData.capa_caminho} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="https://exemplo.com/poster.jpg" />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-txt-muted mb-1">URL da Imagem de Fundo / Banner (Horizontal)</label>
+              <input type="text" name="banner_caminho" value={formData.banner_caminho} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="https://exemplo.com/banner.jpg" />
             </div>
           </div>
           

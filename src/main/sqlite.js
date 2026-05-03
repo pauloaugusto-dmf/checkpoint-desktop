@@ -34,9 +34,16 @@ async function initDatabase() {
         tempo_jogo_minutos INTEGER DEFAULT 0,
         percentual_conclusao REAL DEFAULT 0,
         data_lancamento TEXT,
-        capa_caminho TEXT
+        capa_caminho TEXT,
+        banner_caminho TEXT
       );
     `);
+
+    // Verificar se a coluna 'banner_caminho' existe
+    const jogosColumns = await dbInstance.all("PRAGMA table_info(jogos)");
+    if (!jogosColumns.some(c => c.name === 'banner_caminho')) {
+      await dbInstance.exec("ALTER TABLE jogos ADD COLUMN banner_caminho TEXT;");
+    }
 
     // Tabela de gêneros
     await dbInstance.exec(`
@@ -225,13 +232,13 @@ const addJogo = async (jogo) => {
   if (!dbInstance) await initDatabase();
   
   const result = await dbInstance.run(`
-    INSERT INTO jogos (titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO jogos (titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho, banner_caminho)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     jogo.titulo, jogo.plataforma || null, jogo.status,
     jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0,
     jogo.percentual_conclusao || 0, jogo.data_lancamento || null,
-    jogo.capa_caminho || null
+    jogo.capa_caminho || null, jogo.banner_caminho || null
   ]);
   
   const jogoId = result.lastID;
@@ -253,13 +260,13 @@ const updateJogo = async (id, jogo) => {
     SET titulo = ?, plataforma = ?, status = ?, 
         nota_pessoal = ?, tempo_jogo_minutos = ?, 
         percentual_conclusao = ?, data_lancamento = ?, 
-        capa_caminho = ?
+        capa_caminho = ?, banner_caminho = ?
     WHERE id = ?
   `, [
     jogo.titulo, jogo.plataforma || null, jogo.status,
     jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0,
     jogo.percentual_conclusao || 0, jogo.data_lancamento || null,
-    jogo.capa_caminho || null, id
+    jogo.capa_caminho || null, jogo.banner_caminho || null, id
   ]);
 
   await dbInstance.run('DELETE FROM jogos_generos WHERE jogo_id = ?', id);
