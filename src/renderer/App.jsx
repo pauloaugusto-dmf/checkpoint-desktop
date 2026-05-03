@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles, BarChart3 } from 'lucide-react';
+import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles, BarChart3, TrendingUp } from 'lucide-react';
 import { platforms } from './js/platforms';
 import TitleBar from './components/TitleBar';
 import NavItem from './components/NavItem';
@@ -213,13 +213,31 @@ export default function App() {
 
   const jogosFiltrados = jogos
     .filter(jogo => {
-      const matchesSidebar = activeFilter === 'Todos os Jogos' || 
-                            (activeFilter === 'Jogando' && jogo.status === 'Jogando') ||
-                            (activeFilter === 'Pausados' && jogo.status === 'Pausado') ||
-                            (activeFilter === 'Backlog' && jogo.status === 'Backlog') ||
-                            (activeFilter === 'Completados' && jogo.status === 'Completado') ||
-                            (activeFilter === 'Lista de Desejos' && jogo.status === 'Lista de Desejos') ||
-                            (activeFilter === 'Abandonados' && jogo.status === 'Abandonado');
+      let matchesSidebar = false;
+      
+      // Filtros Normais
+      if (activeFilter === 'Todos os Jogos') matchesSidebar = true;
+      else if (activeFilter === 'Jogando') matchesSidebar = jogo.status === 'Jogando';
+      else if (activeFilter === 'Pausados') matchesSidebar = jogo.status === 'Pausado';
+      else if (activeFilter === 'Backlog') matchesSidebar = jogo.status === 'Backlog';
+      else if (activeFilter === 'Completados') matchesSidebar = jogo.status === 'Completado';
+      else if (activeFilter === 'Lista de Desejos') matchesSidebar = jogo.status === 'Lista de Desejos';
+      else if (activeFilter === 'Abandonados') matchesSidebar = jogo.status === 'Abandonado';
+      
+      // Coleções Inteligentes
+      else if (activeFilter === 'Para Terminar') {
+        matchesSidebar = jogo.status !== 'Completado' && (jogo.percentual_conclusao || 0) >= 70;
+      }
+      else if (activeFilter === 'Obras-Primas') {
+        matchesSidebar = (jogo.nota_pessoal || 0) >= 9;
+      }
+      else if (activeFilter === 'Mais Jogados') {
+        // Ordenar por tempo e pegar top 10 (isso é feito depois no sort, mas aqui filtramos quem tem tempo)
+        matchesSidebar = (jogo.tempo_jogo_minutos || 0) > 0;
+      }
+      else if (activeFilter === 'Prioridade Backlog') {
+        matchesSidebar = jogo.status === 'Backlog' && (jogo.nota_pessoal || 0) >= 8;
+      }
       
       const matchesSearch = jogo.titulo.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'Todos' || jogo.status === filterStatus;
@@ -349,6 +367,45 @@ export default function App() {
             onClick={() => setActiveFilter('Configurações')} 
             isCollapsed={isSidebarCollapsed}
             colorClass={getIconColorClass('Configurações')}
+          />
+
+          {!isSidebarCollapsed && (
+            <div className="pt-6 pb-2 px-6">
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-txt-muted/50">Coleções Inteligentes</h3>
+            </div>
+          )}
+          
+          <NavItem 
+            icon={<TrendingUp className="w-5 h-5" />} 
+            label="Para Terminar" 
+            active={activeFilter === 'Para Terminar'} 
+            onClick={() => setActiveFilter('Para Terminar')} 
+            isCollapsed={isSidebarCollapsed}
+            colorClass="text-blue-400"
+          />
+          <NavItem 
+            icon={<Star className="w-5 h-5" />} 
+            label="Obras-Primas" 
+            active={activeFilter === 'Obras-Primas'} 
+            onClick={() => setActiveFilter('Obras-Primas')} 
+            isCollapsed={isSidebarCollapsed}
+            colorClass="text-yellow-400"
+          />
+          <NavItem 
+            icon={<Clock className="w-5 h-5" />} 
+            label="Mais Jogados" 
+            active={activeFilter === 'Mais Jogados'} 
+            onClick={() => setActiveFilter('Mais Jogados')} 
+            isCollapsed={isSidebarCollapsed}
+            colorClass="text-purple-400"
+          />
+          <NavItem 
+            icon={<Archive className="w-5 h-5" />} 
+            label="Prioridade Backlog" 
+            active={activeFilter === 'Prioridade Backlog'} 
+            onClick={() => setActiveFilter('Prioridade Backlog')} 
+            isCollapsed={isSidebarCollapsed}
+            colorClass="text-rose-400"
           />
         </nav>
       </aside>
