@@ -15,6 +15,7 @@ import { releaseNotes } from './js/releaseNotes';
 
 export default function App() {
   const [jogos, setJogos] = useState([]);
+  const [generos, setGeneros] = useState([]);
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +25,7 @@ export default function App() {
   const [editingJogo, setEditingJogo] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('Todos');
+  const [filterGenero, setFilterGenero] = useState('Todos');
   const [sortBy, setSortBy] = useState('recent');
   const [activeFilter, setActiveFilter] = useState('Todos os Jogos');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -89,6 +91,8 @@ export default function App() {
       if (window.api) {
         const dataJogos = await window.api.getJogos();
         setJogos(dataJogos);
+        const dataGeneros = await window.api.getGeneros();
+        setGeneros(dataGeneros);
         const dataEventos = window.api.getEventos ? await window.api.getEventos() : [];
         setEventos(dataEventos);
       }
@@ -217,8 +221,9 @@ export default function App() {
       
       const matchesSearch = jogo.titulo.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'Todos' || jogo.status === filterStatus;
+      const matchesGenero = filterGenero === 'Todos' || (jogo.generos && jogo.generos.some(g => g.nome === filterGenero));
       
-      return matchesSidebar && matchesSearch && matchesStatus;
+      return matchesSidebar && matchesSearch && matchesStatus && matchesGenero;
     })
     .sort((a, b) => {
       if (sortBy === 'alpha') return a.titulo.localeCompare(b.titulo);
@@ -419,6 +424,17 @@ export default function App() {
                   <option value="Completado">Completado</option>
                   <option value="Abandonado">Abandonado</option>
                   <option value="Lista de Desejos">Lista de Desejos</option>
+                </select>
+
+                <select 
+                  value={filterGenero}
+                  onChange={(e) => setFilterGenero(e.target.value)}
+                  className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-2 text-sm text-txt-main focus:outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer max-w-[150px]"
+                >
+                  <option value="Todos">Todos os Gêneros</option>
+                  {generos.map(gen => (
+                    <option key={gen.id} value={gen.nome}>{gen.nome}</option>
+                  ))}
                 </select>
 
                 <select 
