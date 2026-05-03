@@ -210,7 +210,7 @@ const getJogos = async () => {
   
   for (let jogo of jogos) {
     const generos = await dbInstance.all(`
-      SELECT g.id, g.nome 
+      SELECT g.id, g.nome, g.cor
       FROM generos g
       JOIN jogos_generos jg ON g.id = jg.genero_id
       WHERE jg.jogo_id = ?
@@ -280,7 +280,7 @@ const deleteJogo = async (id) => {
 
 const getGeneros = async () => {
   if (!dbInstance) await initDatabase();
-  return dbInstance.all('SELECT * FROM generos ORDER BY nome ASC');
+  return dbInstance.all('SELECT id, nome, cor FROM generos ORDER BY nome ASC');
 };
 
 const addGenero = async (nome) => {
@@ -313,10 +313,11 @@ const deleteEvento = async (id) => {
 
 const getAllData = async () => {
   if (!dbInstance) await initDatabase();
-  const jogos = await getJogos();
-  const eventos = await dbInstance.all('SELECT * FROM eventos');
-  const generos = await dbInstance.all('SELECT * FROM generos');
-  return { jogos, eventos, generos };
+  return {
+    jogos: await getJogos(),
+    eventos: await getEventos(),
+    generos: await dbInstance.all('SELECT id, nome, cor FROM generos')
+  };
 };
 
 const importData = async (data) => {
