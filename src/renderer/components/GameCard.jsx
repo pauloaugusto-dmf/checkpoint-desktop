@@ -22,13 +22,26 @@ export default function GameCard({ jogo, icon, iconColorClass, onClick }) {
       </div>
       <div className="p-4">
         <h3 className="text-lg font-bold text-txt-main truncate">{jogo.titulo}</h3>
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap gap-1">
           {plataformaObj ? (
-            <span className="text-xs font-semibold px-2 py-1 rounded shadow-sm inline-block" style={{ backgroundColor: plataformaObj.bgColor, color: plataformaObj.color }}>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded shadow-sm inline-block" style={{ backgroundColor: plataformaObj.bgColor, color: plataformaObj.color }}>
               {plataformaObj.name}
             </span>
           ) : (
-            <span className="text-sm text-txt-muted mt-1 block">{jogo.plataforma || 'Nenhuma plataforma'}</span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-700 text-txt-muted">
+              {jogo.plataforma || 'N/A'}
+            </span>
+          )}
+          
+          {jogo.generos && jogo.generos.slice(0, 2).map(gen => (
+            <span key={gen.id} className="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-900/50 text-txt-muted border border-dark-600">
+              {gen.nome}
+            </span>
+          ))}
+          {jogo.generos && jogo.generos.length > 2 && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-900/50 text-txt-muted border border-dark-600">
+              +{jogo.generos.length - 2}
+            </span>
           )}
         </div>
         

@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('api', {
   getEventos: () => ipcRenderer.invoke('eventos:get'),
   addEvento: (evento) => ipcRenderer.invoke('eventos:add', evento),
   deleteEvento: (id) => ipcRenderer.invoke('eventos:delete', id),
+  getGeneros: () => ipcRenderer.invoke('generos:get'),
+  addGenero: (nome) => ipcRenderer.invoke('generos:add', nome),
   exportData: () => ipcRenderer.invoke('data:export'),
   importData: () => ipcRenderer.invoke('data:import')
 });

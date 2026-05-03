@@ -40,6 +40,16 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, icon, iconColo
                 )}
                 <span className="text-txt-muted text-sm font-medium">{formattedDate}</span>
               </div>
+              
+              {jogo.generos && jogo.generos.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {jogo.generos.map(gen => (
+                    <span key={gen.id} className="px-3 py-1 rounded-full text-[10px] font-bold bg-dark-900 border border-dark-600 text-txt-muted uppercase tracking-wider">
+                      {gen.nome}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

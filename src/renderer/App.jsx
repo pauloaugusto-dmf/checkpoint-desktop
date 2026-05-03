@@ -112,12 +112,27 @@ export default function App() {
   const handleSalvarJogo = async (jogoData) => {
     try {
       if (window.api) {
-        if (editingJogo) {
+        let resultId;
+        if (editingJogo && editingJogo.id) {
           await window.api.updateJogo(editingJogo.id, jogoData);
+          resultId = editingJogo.id;
         } else {
-          await window.api.addJogo(jogoData);
+          resultId = await window.api.addJogo(jogoData);
         }
-        await carregarDados();
+        
+        // Recarregar todos os dados
+        const dataJogos = await window.api.getJogos();
+        setJogos(dataJogos);
+        
+        // Se estávamos editando, atualizar o objeto de edição para refletir no Detalhes
+        if (resultId) {
+          const updatedJogo = dataJogos.find(j => j.id === resultId);
+          if (updatedJogo) setEditingJogo(updatedJogo);
+        }
+
+        const dataEventos = window.api.getEventos ? await window.api.getEventos() : [];
+        setEventos(dataEventos);
+        
         setIsModalOpen(false);
       }
     } catch (error) {

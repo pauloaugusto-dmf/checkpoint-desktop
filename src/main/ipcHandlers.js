@@ -1,5 +1,5 @@
 const { ipcMain, dialog, BrowserWindow } = require('electron');
-const { getJogos, addJogo, updateJogo, deleteJogo, getEventos, addEvento, deleteEvento, getAllData, importData } = require('./sqlite');
+const { getJogos, addJogo, updateJogo, deleteJogo, getEventos, addEvento, deleteEvento, getAllData, importData, getGeneros, addGenero } = require('./sqlite');
 const fs = require('fs');
 
 function setupIpcHandlers() {
@@ -17,6 +17,14 @@ function setupIpcHandlers() {
 
   ipcMain.handle('jogos:delete', async (event, id) => {
     return await deleteJogo(id);
+  });
+
+  ipcMain.handle('generos:get', async () => {
+    return await getGeneros();
+  });
+
+  ipcMain.handle('generos:add', async (event, nome) => {
+    return await addGenero(nome);
   });
 
   ipcMain.handle('eventos:get', async () => {
