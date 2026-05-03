@@ -34,7 +34,15 @@ export default function GameCard({ jogo, icon, iconColorClass, onClick }) {
           )}
           
           {jogo.generos && jogo.generos.slice(0, 2).map(gen => (
-            <span key={gen.id} className="text-[10px] font-bold px-2 py-0.5 rounded bg-dark-900/50 text-txt-muted border border-dark-600">
+            <span 
+              key={gen.id} 
+              className="text-[10px] font-bold px-2 py-0.5 rounded border"
+              style={{ 
+                backgroundColor: `${gen.cor}20`, 
+                color: gen.cor, 
+                borderColor: `${gen.cor}40` 
+              }}
+            >
               {gen.nome}
             </span>
           ))}

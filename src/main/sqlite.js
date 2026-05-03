@@ -42,9 +42,16 @@ async function initDatabase() {
     await dbInstance.exec(`
       CREATE TABLE IF NOT EXISTS generos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT NOT NULL UNIQUE
+        nome TEXT NOT NULL UNIQUE,
+        cor TEXT
       );
     `);
+
+    // Verificar se a coluna 'cor' existe (para bancos já criados)
+    const columns = await dbInstance.all("PRAGMA table_info(generos)");
+    if (!columns.some(c => c.name === 'cor')) {
+      await dbInstance.exec("ALTER TABLE generos ADD COLUMN cor TEXT;");
+    }
 
     // Tabela pivot jogos_generos
     await dbInstance.exec(`
@@ -116,23 +123,66 @@ async function initDatabase() {
       }
     }
 
-    // Sincronizar gêneros principais
-    console.log('Syncing main genres...');
+    // Sincronizar gêneros principais com cores
+    console.log('Syncing main genres with colors...');
     const mainGeneros = [
-      'Ação', 'Aventura', 'RPG', 'FPS', 'TPS', 'Shooter', 'Estratégia', 
-      'Simulação', 'Esportes', 'Corrida', 'Terror', 'Horror', 'Plataforma', 
-      'Puzzle', 'Luta', 'Mundo Aberto', 'Indie', 'Soulslike', 
-      'Metroidvania', 'Roguelike', 'Survival', 'Sandbox', 'MOBA', 
-      'Battle Royale', 'MMO', 'MMORPG', 'Hack and Slash', 'Ritmo',
-      'Point and Click', 'Visual Novel', 'Casual', 'Estratégia em Tempo Real (RTS)',
-      'Estratégia por Turnos', 'Card Game', 'Party Game', 'Ficção Científica',
-      'Fantasia', 'Cyberpunk', 'Pós-Apocalíptico', 'Mistério', 'Investigação',
-      'Simulador de Vida', 'Simulador de Voo', 'Simulador de Fazenda', 'Stealth',
-      'Bullet Hell', 'Dungeon Crawler', 'JRPG', 'WRPG', 'Tático', 'Educativo'
+      { nome: 'Ação', cor: '#ef4444' },
+      { nome: 'Aventura', cor: '#10b981' },
+      { nome: 'RPG', cor: '#8b5cf6' },
+      { nome: 'FPS', cor: '#f59e0b' },
+      { nome: 'TPS', cor: '#fbbf24' },
+      { nome: 'Shooter', cor: '#f97316' },
+      { nome: 'Estratégia', cor: '#0ea5e9' },
+      { nome: 'Simulação', cor: '#6366f1' },
+      { nome: 'Esportes', cor: '#3b82f6' },
+      { nome: 'Corrida', cor: '#22c55e' },
+      { nome: 'Terror', cor: '#7f1d1d' },
+      { nome: 'Horror', cor: '#450a0a' },
+      { nome: 'Plataforma', cor: '#ec4899' },
+      { nome: 'Puzzle', cor: '#14b8a6' },
+      { nome: 'Luta', cor: '#dc2626' },
+      { nome: 'Mundo Aberto', cor: '#06b6d4' },
+      { nome: 'Indie', cor: '#f43f5e' },
+      { nome: 'Soulslike', cor: '#475569' },
+      { nome: 'Metroidvania', cor: '#2dd4bf' },
+      { nome: 'Roguelike', cor: '#84cc16' },
+      { nome: 'Survival', cor: '#166534' },
+      { nome: 'Sandbox', cor: '#0891b2' },
+      { nome: 'MOBA', cor: '#2563eb' },
+      { nome: 'Battle Royale', cor: '#9333ea' },
+      { nome: 'MMO', cor: '#4f46e5' },
+      { nome: 'MMORPG', cor: '#6366f1' },
+      { nome: 'Hack and Slash', cor: '#be123c' },
+      { nome: 'Ritmo', cor: '#f06292' },
+      { nome: 'Point and Click', cor: '#5c6bc0' },
+      { nome: 'Visual Novel', cor: '#d81b60' },
+      { nome: 'Casual', cor: '#9ccc65' },
+      { nome: 'Estratégia em Tempo Real (RTS)', cor: '#1e88e5' },
+      { nome: 'Estratégia por Turnos', cor: '#3949ab' },
+      { nome: 'Card Game', cor: '#795548' },
+      { nome: 'Party Game', cor: '#ff7043' },
+      { nome: 'Ficção Científica', cor: '#00bcd4' },
+      { nome: 'Fantasia', cor: '#673ab7' },
+      { nome: 'Cyberpunk', cor: '#f81ce5' },
+      { nome: 'Pós-Apocalíptico', cor: '#546e7a' },
+      { nome: 'Mistério', cor: '#303f9f' },
+      { nome: 'Investigação', cor: '#1a237e' },
+      { nome: 'Simulador de Vida', cor: '#ff80ab' },
+      { nome: 'Simulador de Voo', cor: '#4fc3f7' },
+      { nome: 'Simulador de Fazenda', cor: '#9ccc65' },
+      { nome: 'Stealth', cor: '#263238' },
+      { nome: 'Bullet Hell', cor: '#ff1744' },
+      { nome: 'Dungeon Crawler', cor: '#4e342e' },
+      { nome: 'JRPG', cor: '#7e57c2' },
+      { nome: 'WRPG', cor: '#5c6bc0' },
+      { nome: 'Tático', cor: '#2e7d32' },
+      { nome: 'Educativo', cor: '#9c27b0' }
     ];
     
     for (const gen of mainGeneros) {
-      await dbInstance.run('INSERT OR IGNORE INTO generos (nome) VALUES (?)', gen);
+      await dbInstance.run('INSERT OR IGNORE INTO generos (nome, cor) VALUES (?, ?)', [gen.nome, gen.cor]);
+      // Se já existe mas não tem cor, atualizar
+      await dbInstance.run('UPDATE generos SET cor = ? WHERE nome = ? AND (cor IS NULL OR cor = "")', [gen.cor, gen.nome]);
     }
     
     console.log(`Genres synced. Total in DB: ${(await dbInstance.get('SELECT COUNT(*) as c FROM generos')).c}`);
@@ -235,8 +285,10 @@ const getGeneros = async () => {
 
 const addGenero = async (nome) => {
   if (!dbInstance) await initDatabase();
-  const result = await dbInstance.run('INSERT INTO generos (nome) VALUES (?)', nome);
-  return { id: result.lastID, nome };
+  const colors = ['#ef4444', '#10b981', '#8b5cf6', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#f43f5e', '#06b6d4'];
+  const randomColor = colors[Math.floor(Math.random() * colors.length)];
+  const result = await dbInstance.run('INSERT INTO generos (nome, cor) VALUES (?, ?)', [nome, randomColor]);
+  return { id: result.lastID, nome, cor: randomColor };
 };
 
 const getEventos = async () => {

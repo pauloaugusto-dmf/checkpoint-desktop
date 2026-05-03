@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles } from 'lucide-react';
+import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles, BarChart3 } from 'lucide-react';
 import { platforms } from './js/platforms';
 import TitleBar from './components/TitleBar';
 import NavItem from './components/NavItem';
@@ -10,6 +10,7 @@ import DayDetailsModal from './components/DayDetailsModal';
 import GameDetailsModal from './components/GameDetailsModal';
 import CalendarView from './components/CalendarView';
 import SettingsView from './components/SettingsView';
+import StatisticsView from './components/StatisticsView';
 import ReleaseNotesModal from './components/ReleaseNotesModal';
 import { releaseNotes } from './js/releaseNotes';
 
@@ -206,6 +207,7 @@ export default function App() {
     'Abandonado': <ListMinus />,
     'Lista de Desejos': <Library />,
     'Calendário': <CalendarDays />,
+    'Estatísticas': <BarChart3 />,
     'Configurações': <Settings />,
   };
 
@@ -325,6 +327,14 @@ export default function App() {
             colorClass={getIconColorClass('Calendário')}
           />
           <NavItem 
+            icon={menuIcons['Estatísticas']} 
+            label="Estatísticas" 
+            active={activeFilter === 'Estatísticas'} 
+            onClick={() => setActiveFilter('Estatísticas')} 
+            isCollapsed={isSidebarCollapsed}
+            colorClass="text-amber-500"
+          />
+          <NavItem 
             icon={<Sparkles className="w-5 h-5" />} 
             label="Novidades" 
             active={false} 
@@ -396,6 +406,8 @@ export default function App() {
             iconStyle={iconStyle}
             applyIconStyle={applyIconStyle}
           />
+        ) : activeFilter === 'Estatísticas' ? (
+          <StatisticsView jogos={jogos} generos={generos} />
         ) : (
           <div className="flex-1 overflow-y-auto p-8 relative flex flex-col gap-8 custom-scrollbar">
             {/* Filter & Sort Bar */}

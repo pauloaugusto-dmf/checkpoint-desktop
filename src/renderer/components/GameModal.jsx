@@ -138,13 +138,18 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
                     .map(gen => (
                       <span 
                         key={gen.id} 
-                        className="px-3 py-1 rounded-full text-xs font-medium bg-primary-600/20 text-primary-400 border border-primary-500/30 flex items-center gap-2 animate-in fade-in zoom-in-95"
+                        className="px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-2 animate-in fade-in zoom-in-95"
+                        style={{ 
+                          backgroundColor: `${gen.cor}20`, 
+                          color: gen.cor, 
+                          borderColor: `${gen.cor}40` 
+                        }}
                       >
                         {gen.nome}
                         <button 
                           type="button" 
                           onClick={() => handleToggleGenero(gen.id)}
-                          className="hover:text-white transition-colors"
+                          className="hover:opacity-70 transition-opacity"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -332,11 +337,16 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
                         key={gen.id}
                         type="button"
                         onClick={() => handleToggleGenero(gen.id)}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition-all border ${
+                        className={`px-3 py-2.5 rounded-xl text-xs font-bold text-left transition-all border ${
                           selectedGeneros.includes(gen.id)
-                            ? 'bg-primary-600 text-white border-primary-500 shadow-lg shadow-primary-500/20'
+                            ? 'shadow-lg shadow-black/20'
                             : 'bg-dark-900 text-txt-muted border-dark-700 hover:border-dark-500 hover:text-txt-main'
                         }`}
+                        style={selectedGeneros.includes(gen.id) ? {
+                          backgroundColor: gen.cor,
+                          color: '#fff',
+                          borderColor: gen.cor
+                        } : {}}
                       >
                         {gen.nome}
                       </button>

@@ -44,7 +44,15 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, icon, iconColo
               {jogo.generos && jogo.generos.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-4">
                   {jogo.generos.map(gen => (
-                    <span key={gen.id} className="px-3 py-1 rounded-full text-[10px] font-bold bg-dark-900 border border-dark-600 text-txt-muted uppercase tracking-wider">
+                    <span 
+                      key={gen.id} 
+                      className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all"
+                      style={{ 
+                        backgroundColor: `${gen.cor}15`, 
+                        color: gen.cor, 
+                        borderColor: `${gen.cor}30` 
+                      }}
+                    >
                       {gen.nome}
                     </span>
                   ))}
