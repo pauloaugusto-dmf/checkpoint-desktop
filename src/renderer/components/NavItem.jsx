@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function NavItem({ icon, label, active, onClick, isCollapsed, colorClass }) {
+export default function NavItem({ icon, label, active, onClick, isCollapsed, colorClass, className = "" }) {
   return (
     <button 
       onClick={onClick}
-      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'} py-3 rounded-lg transition-all group relative ${active ? 'bg-primary-500/10 text-primary-400 font-bold' : 'text-txt-muted hover:bg-dark-700/50 hover:text-txt-main'}`}
+      className={`w-full flex items-center ${isCollapsed ? 'justify-center px-0' : 'gap-3 px-4'} py-3 rounded-lg transition-all group relative ${active ? 'bg-primary-500/10 text-primary-400 font-bold' : 'text-txt-muted hover:bg-dark-700/50 hover:text-txt-main'} ${className}`}
       title={isCollapsed ? label : ''}
     >
       {React.cloneElement(icon, { className: `w-5 h-5 shrink-0 transition-colors ${colorClass || ''}` })}

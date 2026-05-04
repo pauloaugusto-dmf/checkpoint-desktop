@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles, BarChart3, TrendingUp } from 'lucide-react';
+import { Gamepad2, LayoutGrid, CheckCircle2, ListMinus, Library, Plus, X, Trash2, Minus, Square, CalendarDays, ChevronLeft, ChevronRight, ChevronDown, Archive, Pause, PanelLeftClose, PanelLeft, Menu, Settings, Download, Upload, Palette, Star, Clock, Edit3, Search, Sparkles, BarChart3, TrendingUp } from 'lucide-react';
 import { platforms } from './js/platforms';
 import TitleBar from './components/TitleBar';
 import NavItem from './components/NavItem';
@@ -30,6 +30,11 @@ export default function App() {
   const [sortBy, setSortBy] = useState('recent');
   const [activeFilter, setActiveFilter] = useState('Todos os Jogos');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sectionsExpanded, setSectionsExpanded] = useState({
+    library: true,
+    smart: true,
+    tools: true
+  });
   const [selectedDateForEvent, setSelectedDateForEvent] = useState(null);
   const [selectedDayData, setSelectedDayData] = useState(null);
   const [currentTheme, setCurrentTheme] = useState('violet');
@@ -278,135 +283,198 @@ export default function App() {
           )}
         </div>
         
-        <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto custom-scrollbar">
-          <NavItem 
-            icon={menuIcons['Todos os Jogos']} 
-            label="Todos os Jogos" 
-            active={activeFilter === 'Todos os Jogos'} 
-            onClick={() => setActiveFilter('Todos os Jogos')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Todos os Jogos')}
-          />
-          <NavItem 
-            icon={menuIcons['Jogando']} 
-            label="Jogando" 
-            active={activeFilter === 'Jogando'} 
-            onClick={() => setActiveFilter('Jogando')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Jogando')}
-          />
-          <NavItem 
-            icon={menuIcons['Pausado']} 
-            label="Pausados" 
-            active={activeFilter === 'Pausados'} 
-            onClick={() => setActiveFilter('Pausados')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Pausado')}
-          />
-          <NavItem 
-            icon={menuIcons['Backlog']} 
-            label="Backlog" 
-            active={activeFilter === 'Backlog'} 
-            onClick={() => setActiveFilter('Backlog')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Backlog')}
-          />
-          <NavItem 
-            icon={menuIcons['Completado']} 
-            label="Completados" 
-            active={activeFilter === 'Completados'} 
-            onClick={() => setActiveFilter('Completados')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Completado')}
-          />
-          <NavItem 
-            icon={menuIcons['Lista de Desejos']} 
-            label="Lista de Desejos" 
-            active={activeFilter === 'Lista de Desejos'} 
-            onClick={() => setActiveFilter('Lista de Desejos')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Lista de Desejos')}
-          />
-          <NavItem 
-            icon={menuIcons['Abandonado']} 
-            label="Abandonados" 
-            active={activeFilter === 'Abandonados'} 
-            onClick={() => setActiveFilter('Abandonados')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Abandonado')}
-          />
-          <div className="h-px bg-dark-700 my-2 mx-2"></div>
-          <NavItem 
-            icon={menuIcons['Calendário']} 
-            label="Calendário" 
-            active={activeFilter === 'Calendário'} 
-            onClick={() => setActiveFilter('Calendário')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Calendário')}
-          />
-          <NavItem 
-            icon={menuIcons['Estatísticas']} 
-            label="Estatísticas" 
-            active={activeFilter === 'Estatísticas'} 
-            onClick={() => setActiveFilter('Estatísticas')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass="text-amber-500"
-          />
-          <NavItem 
-            icon={<Sparkles className="w-5 h-5" />} 
-            label="Novidades" 
-            active={false} 
-            onClick={() => setIsReleaseNotesOpen(true)} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass="text-emerald-500"
-          />
-          <NavItem 
-            icon={menuIcons['Configurações']} 
-            label="Configurações" 
-            active={activeFilter === 'Configurações'} 
-            onClick={() => setActiveFilter('Configurações')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass={getIconColorClass('Configurações')}
-          />
+        <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto custom-scrollbar pb-10">
+          {/* DESTAQUE: CALENDÁRIO */}
+          <div className={isSidebarCollapsed ? 'mb-2' : 'mb-6'}>
+            <NavItem 
+              icon={menuIcons['Calendário']} 
+              label="Calendário" 
+              active={activeFilter === 'Calendário'} 
+              onClick={() => setActiveFilter('Calendário')} 
+              isCollapsed={isSidebarCollapsed}
+              colorClass="text-primary-500"
+              className={`border-primary-500/20 ${isSidebarCollapsed ? 'bg-transparent border-0' : 'bg-primary-500/5 border py-3'}`}
+            />
+          </div>
 
-          {!isSidebarCollapsed && (
-            <div className="pt-6 pb-2 px-6">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-txt-muted/50">Coleções Inteligentes</h3>
-            </div>
-          )}
-          
-          <NavItem 
-            icon={<TrendingUp className="w-5 h-5" />} 
-            label="Para Terminar" 
-            active={activeFilter === 'Para Terminar'} 
-            onClick={() => setActiveFilter('Para Terminar')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass="text-blue-400"
-          />
-          <NavItem 
-            icon={<Star className="w-5 h-5" />} 
-            label="Obras-Primas" 
-            active={activeFilter === 'Obras-Primas'} 
-            onClick={() => setActiveFilter('Obras-Primas')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass="text-yellow-400"
-          />
-          <NavItem 
-            icon={<Clock className="w-5 h-5" />} 
-            label="Mais Jogados" 
-            active={activeFilter === 'Mais Jogados'} 
-            onClick={() => setActiveFilter('Mais Jogados')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass="text-purple-400"
-          />
-          <NavItem 
-            icon={<Archive className="w-5 h-5" />} 
-            label="Prioridade Backlog" 
-            active={activeFilter === 'Prioridade Backlog'} 
-            onClick={() => setActiveFilter('Prioridade Backlog')} 
-            isCollapsed={isSidebarCollapsed}
-            colorClass="text-rose-400"
-          />
+          {/* SEÇÃO: BIBLIOTECA */}
+          <div className="space-y-1">
+            {!isSidebarCollapsed && (
+              <button 
+                onClick={() => setSectionsExpanded(p => ({ ...p, library: !p.library }))}
+                className="w-full flex items-center justify-between py-2 px-3 mb-1 group transition-colors hover:bg-dark-700/50 rounded-lg cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutGrid className={`w-4 h-4 ${activeFilter === 'Todos os Jogos' ? 'text-primary-500' : 'text-txt-muted'}`} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-txt-muted/80">Biblioteca</span>
+                </div>
+                <ChevronDown className={`w-3 h-3 text-txt-muted/50 transition-transform duration-300 ${sectionsExpanded.library ? '' : '-rotate-90'}`} />
+              </button>
+            )}
+            
+            {(sectionsExpanded.library || isSidebarCollapsed) && (
+              <div className={`space-y-1 ${!isSidebarCollapsed ? 'ml-3 border-l border-dark-700/50 pl-2' : ''} animate-in fade-in slide-in-from-top-1 duration-200`}>
+                <NavItem 
+                  icon={menuIcons['Todos os Jogos']} 
+                  label="Todos os Jogos" 
+                  active={activeFilter === 'Todos os Jogos'} 
+                  onClick={() => setActiveFilter('Todos os Jogos')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Todos os Jogos')}
+                />
+                <NavItem 
+                  icon={menuIcons['Jogando']} 
+                  label="Jogando" 
+                  active={activeFilter === 'Jogando'} 
+                  onClick={() => setActiveFilter('Jogando')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Jogando')}
+                />
+                <NavItem 
+                  icon={menuIcons['Pausado']} 
+                  label="Pausados" 
+                  active={activeFilter === 'Pausados'} 
+                  onClick={() => setActiveFilter('Pausados')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Pausado')}
+                />
+                <NavItem 
+                  icon={menuIcons['Backlog']} 
+                  label="Backlog" 
+                  active={activeFilter === 'Backlog'} 
+                  onClick={() => setActiveFilter('Backlog')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Backlog')}
+                />
+                <NavItem 
+                  icon={menuIcons['Completado']} 
+                  label="Completados" 
+                  active={activeFilter === 'Completados'} 
+                  onClick={() => setActiveFilter('Completados')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Completado')}
+                />
+                <NavItem 
+                  icon={menuIcons['Lista de Desejos']} 
+                  label="Lista de Desejos" 
+                  active={activeFilter === 'Lista de Desejos'} 
+                  onClick={() => setActiveFilter('Lista de Desejos')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Lista de Desejos')}
+                />
+                <NavItem 
+                  icon={menuIcons['Abandonado']} 
+                  label="Abandonados" 
+                  active={activeFilter === 'Abandonados'} 
+                  onClick={() => setActiveFilter('Abandonados')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Abandonado')}
+                />
+              </div>
+            )}
+          </div>
+
+          {!isSidebarCollapsed && <div className="h-px bg-dark-700/50 my-4 mx-2"></div>}
+
+          {/* SEÇÃO: COLEÇÕES INTELIGENTES */}
+          <div className="space-y-1">
+            {!isSidebarCollapsed && (
+              <button 
+                onClick={() => setSectionsExpanded(p => ({ ...p, smart: !p.smart }))}
+                className="w-full flex items-center justify-between py-2 px-3 mb-1 group transition-colors hover:bg-dark-700/50 rounded-lg cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-4 h-4 text-primary-500" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-txt-muted/80">Smart Collections</span>
+                </div>
+                <ChevronDown className={`w-3 h-3 text-txt-muted/50 transition-transform duration-300 ${sectionsExpanded.smart ? '' : '-rotate-90'}`} />
+              </button>
+            )}
+
+            {(sectionsExpanded.smart || isSidebarCollapsed) && (
+              <div className={`space-y-1 ${!isSidebarCollapsed ? 'ml-3 border-l border-dark-700/50 pl-2' : ''} animate-in fade-in slide-in-from-top-1 duration-200`}>
+                <NavItem 
+                  icon={<TrendingUp className="w-5 h-5" />} 
+                  label="Para Terminar" 
+                  active={activeFilter === 'Para Terminar'} 
+                  onClick={() => setActiveFilter('Para Terminar')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass="text-blue-400"
+                />
+                <NavItem 
+                  icon={<Star className="w-5 h-5" />} 
+                  label="Obras-Primas" 
+                  active={activeFilter === 'Obras-Primas'} 
+                  onClick={() => setActiveFilter('Obras-Primas')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass="text-yellow-400"
+                />
+                <NavItem 
+                  icon={<Clock className="w-5 h-5" />} 
+                  label="Mais Jogados" 
+                  active={activeFilter === 'Mais Jogados'} 
+                  onClick={() => setActiveFilter('Mais Jogados')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass="text-purple-400"
+                />
+                <NavItem 
+                  icon={<Archive className="w-5 h-5" />} 
+                  label="Prioridade Backlog" 
+                  active={activeFilter === 'Prioridade Backlog'} 
+                  onClick={() => setActiveFilter('Prioridade Backlog')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass="text-rose-400"
+                />
+              </div>
+            )}
+          </div>
+
+          {!isSidebarCollapsed && <div className="h-px bg-dark-700/50 my-4 mx-2"></div>}
+
+          {/* SEÇÃO: FERRAMENTAS & SISTEMA */}
+          <div className="space-y-1">
+            {!isSidebarCollapsed && (
+              <button 
+                onClick={() => setSectionsExpanded(p => ({ ...p, tools: !p.tools }))}
+                className="w-full flex items-center justify-between py-2 px-3 mb-1 group transition-colors hover:bg-dark-700/50 rounded-lg cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <Settings className="w-4 h-4 text-txt-muted" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-txt-muted/80">Sistema</span>
+                </div>
+                <ChevronDown className={`w-3 h-3 text-txt-muted/50 transition-transform duration-300 ${sectionsExpanded.tools ? '' : '-rotate-90'}`} />
+              </button>
+            )}
+
+            {(sectionsExpanded.tools || isSidebarCollapsed) && (
+              <div className={`space-y-1 ${!isSidebarCollapsed ? 'ml-3 border-l border-dark-700/50 pl-2' : ''} animate-in fade-in slide-in-from-top-1 duration-200`}>
+                <NavItem 
+                  icon={menuIcons['Estatísticas']} 
+                  label="Estatísticas" 
+                  active={activeFilter === 'Estatísticas'} 
+                  onClick={() => setActiveFilter('Estatísticas')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass="text-amber-500"
+                />
+                <NavItem 
+                  icon={<Sparkles className="w-5 h-5" />} 
+                  label="Novidades" 
+                  active={false} 
+                  onClick={() => setIsReleaseNotesOpen(true)} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass="text-emerald-500"
+                />
+                <NavItem 
+                  icon={menuIcons['Configurações']} 
+                  label="Configurações" 
+                  active={activeFilter === 'Configurações'} 
+                  onClick={() => setActiveFilter('Configurações')} 
+                  isCollapsed={isSidebarCollapsed}
+                  colorClass={getIconColorClass('Configurações')}
+                />
+              </div>
+            )}
+          </div>
         </nav>
       </aside>
 
