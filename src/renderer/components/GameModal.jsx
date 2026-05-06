@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, X, Plus, Tag as TagIcon, Search } from 'lucide-react';
+import { Trash2, X, Plus, Tag as TagIcon, Search, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
 import { platforms } from '../js/platforms';
 
 export default function GameModal({ onClose, onSave, onDelete, initialData }) {
@@ -10,6 +12,7 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
   const [showAddGenero, setShowAddGenero] = useState(false);
   const [generoSearch, setGeneroSearch] = useState('');
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const [formData, setFormData] = useState({
     ...initialData,
@@ -17,14 +20,19 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     plataforma: initialData?.plataforma || '',
     status: initialData?.status || 'Lista de Desejos',
     nota_pessoal: initialData?.nota_pessoal || 0,
-    tempo_jogo_minutos: initialData?.tempo_jogo_minutos || 0,
     percentual_conclusao: initialData?.percentual_conclusao || 0,
     data_lancamento: initialData?.data_lancamento || '',
     capa_caminho: initialData?.capa_caminho || '',
     banner_caminho: initialData?.banner_caminho || '',
+    tempo_estimado_hltb: initialData?.tempo_estimado_hltb || 0,
+    hltb_horas: Math.floor((initialData?.tempo_estimado_hltb || 0) / 60),
+    hltb_minutos: (initialData?.tempo_estimado_hltb || 0) % 60,
+    tempo_jogo_minutos: initialData?.tempo_jogo_minutos || 0,
     tempo_horas: Math.floor((initialData?.tempo_jogo_minutos || 0) / 60),
     tempo_minutos: (initialData?.tempo_jogo_minutos || 0) % 60
   });
+
+
 
   useEffect(() => {
     loadGeneros();
@@ -60,7 +68,45 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     }
   };
 
+  const handleSyncHLTB = async () => {
+    if (!formData.titulo.trim()) {
+      toast.error('Digite o título do jogo para buscar!');
+      return;
+    }
+
+    setIsSyncing(true);
+    const toastId = toast.loading(`Buscando "${formData.titulo}" no HLTB...`);
+
+    try {
+      const result = await window.api.fetchHLTB(formData.titulo);
+      
+      if (result) {
+        // howlongtobeat retorna tempos em horas. Vamos usar o "Main Story" (gameplayMain)
+        const tempoHoras = Math.floor(result.gameplayMain || 0);
+        const tempoMinutos = Math.round(((result.gameplayMain || 0) % 1) * 60);
+        const totalMinutos = (tempoHoras * 60) + tempoMinutos;
+
+        setFormData(prev => ({
+          ...prev,
+          tempo_estimado_hltb: totalMinutos,
+          hltb_horas: tempoHoras,
+          hltb_minutos: tempoMinutos
+        }));
+
+        toast.success('Dados sincronizados com sucesso!', { id: toastId });
+      } else {
+        toast.error('Nenhum resultado encontrado para este título.', { id: toastId });
+      }
+    } catch (error) {
+      console.error('Erro ao sincronizar HLTB:', error);
+      toast.error('Erro ao conectar com o serviço HLTB.', { id: toastId });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleChange = (e) => {
+
     const { name, value } = e.target;
     setFormData(prev => {
       const newState = { ...prev, [name]: value };
@@ -69,8 +115,14 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
         const m = parseInt(name === 'tempo_minutos' ? value : prev.tempo_minutos) || 0;
         newState.tempo_jogo_minutos = (h * 60) + m;
       }
+      if (name === 'hltb_horas' || name === 'hltb_minutos') {
+        const h = parseInt(name === 'hltb_horas' ? value : prev.hltb_horas) || 0;
+        const m = parseInt(name === 'hltb_minutos' ? value : prev.hltb_minutos) || 0;
+        newState.tempo_estimado_hltb = (h * 60) + m;
+      }
       return newState;
     });
+
   };
 
   const handleSubmit = (e) => {
@@ -80,14 +132,24 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
       generos: selectedGeneros,
       nota_pessoal: parseFloat(formData.nota_pessoal) || 0,
       tempo_jogo_minutos: parseInt(formData.tempo_jogo_minutos) || 0,
-      percentual_conclusao: parseFloat(formData.percentual_conclusao) || 0
+      percentual_conclusao: parseFloat(formData.percentual_conclusao) || 0,
+      nota_metacritic: parseInt(formData.nota_metacritic) || 0,
+      tempo_estimado_hltb: parseInt(formData.tempo_estimado_hltb) || 0
     };
     onSave(jogoFinal);
+
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="bg-dark-800 border border-dark-700 rounded-xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+      >
+
         <div className="p-6 border-b border-dark-700 flex justify-between items-center bg-dark-900">
           <h2 className="text-xl font-bold text-txt-main">{isEditing ? 'Editar Jogo' : 'Adicionar Novo Jogo'}</h2>
           <button onClick={onClose} className="text-txt-muted hover:text-txt-main transition-colors">
@@ -179,8 +241,37 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
               <input type="number" step="0.1" min="0" max="100" name="percentual_conclusao" value={formData.percentual_conclusao} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" />
             </div>
 
+            <div className="col-span-2 bg-dark-900/50 p-4 rounded-xl border border-dark-700/50">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-black uppercase tracking-widest text-primary-500">Dados Externos (HowLongToBeat)</span>
+                <button 
+                  type="button"
+                  disabled={isSyncing}
+                  onClick={handleSyncHLTB}
+                  className="text-[10px] bg-primary-600 hover:bg-primary-500 disabled:bg-dark-600 disabled:cursor-not-allowed px-3 py-1 rounded text-white font-bold transition-all flex items-center gap-1"
+                >
+                  {isSyncing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                  {isSyncing ? 'Sincronizando...' : 'Sincronizar HLTB'}
+                </button>
+
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-txt-muted mb-1">Tempo Estimado (Média HLTB)</label>
+                  <div className="flex items-center gap-2">
+                    <input type="number" min="0" name="hltb_horas" value={formData.hltb_horas} onChange={handleChange} className="w-1/2 bg-dark-900 border border-dark-600 rounded-lg px-3 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="h" />
+                    <span className="text-xs text-txt-muted">h</span>
+                    <input type="number" min="0" max="59" name="hltb_minutos" value={formData.hltb_minutos} onChange={handleChange} className="w-1/2 bg-dark-900 border border-dark-600 rounded-lg px-3 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="m" />
+                    <span className="text-xs text-txt-muted">m</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-txt-muted mb-1">Tempo de Jogo</label>
+              <label className="block text-sm font-medium text-txt-muted mb-1">Tempo de Jogo (Seu tempo real)</label>
               <div className="flex items-center gap-3">
                 <div className="flex-1 flex items-center gap-2">
                   <input 
@@ -209,6 +300,7 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
                 </div>
               </div>
             </div>
+
 
             <div>
               <label className="block text-sm font-medium text-txt-muted mb-1">Data de Lançamento</label>

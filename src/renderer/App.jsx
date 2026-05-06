@@ -162,6 +162,29 @@ export default function App() {
   };
 
 
+  const handleQuickUpdate = async (id, partialData) => {
+    try {
+      if (window.api) {
+        const jogoAtual = jogos.find(j => j.id === id);
+        if (!jogoAtual) return;
+        
+        const jogoAtualizado = { ...jogoAtual, ...partialData };
+        await window.api.updateJogo(id, jogoAtualizado);
+        
+        const dataJogos = await window.api.getJogos();
+        setJogos(dataJogos);
+        
+        // Atualizar o jogo que está sendo visualizado no modal
+        setEditingJogo(dataJogos.find(j => j.id === id));
+        
+        toast.success('Dados atualizados!');
+      }
+    } catch (error) {
+      console.error("Erro na atualização rápida:", error);
+      toast.error('Erro ao atualizar dados.');
+    }
+  };
+
   const jogosFiltrados = useMemo(() => {
 
     return jogos
@@ -309,9 +332,11 @@ export default function App() {
             jogo={editingJogo}
             onClose={() => setIsDetailsModalOpen(false)}
             onEdit={() => { setIsDetailsModalOpen(false); setIsModalOpen(true); }}
+            onUpdate={handleQuickUpdate}
             icon={statusIcons[editingJogo.status]}
             iconColorClass={getIconColorClass(editingJogo.status)}
           />
+
         )}
 
         {isReleaseNotesOpen && (

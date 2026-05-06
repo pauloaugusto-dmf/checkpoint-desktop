@@ -1,8 +1,61 @@
 const { ipcMain, dialog, BrowserWindow } = require('electron');
 const { getJogos, addJogo, updateJogo, deleteJogo, getEventos, addEvento, deleteEvento, getAllData, importData, getGeneros, addGenero } = require('./sqlite');
 const fs = require('fs');
+const { spawn } = require('child_process');
+const path = require('path');
 
 function setupIpcHandlers() {
+  ipcMain.handle('jogos:fetchHLTB', async (event, titulo) => {
+    return new Promise((resolve, reject) => {
+      console.log(`[HLTB] Chamando serviço Python para: "${titulo}"...`);
+      
+      // Caminho para o script Python dentro do projeto
+      const pythonScriptPath = path.join(__dirname, 'services', 'hltb_service.py');
+      
+      // Executa o script Python
+      const pythonProcess = spawn('python3', [pythonScriptPath, titulo]);
+      
+      let dataString = '';
+      let errorString = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        dataString += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        errorString += data.toString();
+      });
+
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error(`[HLTB] Erro no processo Python (Código ${code}):`, errorString);
+          resolve(null);
+          return;
+        }
+
+        try {
+          const result = JSON.parse(dataString);
+          if (result.error) {
+            console.warn(`[HLTB] Serviço retornou aviso: ${result.error}`);
+            resolve(null);
+          } else {
+            console.log(`[HLTB] Dados recebidos com sucesso para: ${result.name}`);
+            resolve(result);
+          }
+        } catch (e) {
+          console.error('[HLTB] Erro ao processar JSON do Python:', e);
+          resolve(null);
+        }
+      });
+    });
+  });
+
+
+
+
+
+
+
   ipcMain.handle('jogos:get', async () => {
     return await getJogos();
   });

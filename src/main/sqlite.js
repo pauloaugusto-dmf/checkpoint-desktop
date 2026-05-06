@@ -24,26 +24,35 @@ async function initDatabase() {
     await dbInstance.exec('PRAGMA foreign_keys = ON;');
 
     // Tabela de jogos
-    await dbInstance.exec(`
-      CREATE TABLE IF NOT EXISTS jogos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        titulo TEXT NOT NULL,
-        plataforma TEXT,
-        status TEXT NOT NULL,
-        nota_pessoal REAL DEFAULT 0,
-        tempo_jogo_minutos INTEGER DEFAULT 0,
-        percentual_conclusao REAL DEFAULT 0,
-        data_lancamento TEXT,
-        capa_caminho TEXT,
-        banner_caminho TEXT
-      );
-    `);
+      await dbInstance.exec(`
+        CREATE TABLE IF NOT EXISTS jogos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          titulo TEXT NOT NULL,
+          plataforma TEXT,
+          status TEXT NOT NULL,
+          nota_pessoal REAL DEFAULT 0,
+          tempo_jogo_minutos INTEGER DEFAULT 0,
+          percentual_conclusao REAL DEFAULT 0,
+          data_lancamento TEXT,
+          capa_caminho TEXT,
+          banner_caminho TEXT,
+          nota_metacritic INTEGER DEFAULT 0,
+          tempo_estimado_hltb INTEGER DEFAULT 0,
+          hltb_main_extra INTEGER DEFAULT 0,
+          hltb_completionist INTEGER DEFAULT 0
+        );
+      `);
 
-    // Verificar se a coluna 'banner_caminho' existe
-    const jogosColumns = await dbInstance.all("PRAGMA table_info(jogos)");
-    if (!jogosColumns.some(c => c.name === 'banner_caminho')) {
-      await dbInstance.exec("ALTER TABLE jogos ADD COLUMN banner_caminho TEXT;");
-    }
+      const columns = await dbInstance.all("PRAGMA table_info(jogos)");
+      const columnNames = columns.map(c => c.name);
+
+      if (!columnNames.includes('hltb_main_extra')) {
+        await dbInstance.run("ALTER TABLE jogos ADD COLUMN hltb_main_extra INTEGER DEFAULT 0;");
+      }
+      if (!columnNames.includes('hltb_completionist')) {
+        await dbInstance.run("ALTER TABLE jogos ADD COLUMN hltb_completionist INTEGER DEFAULT 0;");
+      }
+
 
     // Tabela de gêneros
     await dbInstance.exec(`
@@ -55,8 +64,8 @@ async function initDatabase() {
     `);
 
     // Verificar se a coluna 'cor' existe (para bancos já criados)
-    const columns = await dbInstance.all("PRAGMA table_info(generos)");
-    if (!columns.some(c => c.name === 'cor')) {
+    const columnsGeneros = await dbInstance.all("PRAGMA table_info(generos)");
+    if (!columnsGeneros.some(c => c.name === 'cor')) {
       await dbInstance.exec("ALTER TABLE generos ADD COLUMN cor TEXT;");
     }
 
@@ -250,14 +259,22 @@ const addJogo = async (jogo) => {
   if (!dbInstance) await initDatabase();
   
   const result = await dbInstance.run(`
-    INSERT INTO jogos (titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho, banner_caminho)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO jogos (
+      titulo, plataforma, status, nota_pessoal, 
+      tempo_jogo_minutos, percentual_conclusao, 
+      data_lancamento, capa_caminho, banner_caminho,
+      nota_metacritic, tempo_estimado_hltb,
+      hltb_main_extra, hltb_completionist
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     jogo.titulo, jogo.plataforma || null, jogo.status,
     jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0,
     jogo.percentual_conclusao || 0, jogo.data_lancamento || null,
-    jogo.capa_caminho || null, jogo.banner_caminho || null
+    jogo.capa_caminho || null, jogo.banner_caminho || null,
+    jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0,
+    jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0
   ]);
+
   
   const jogoId = result.lastID;
   
@@ -278,21 +295,33 @@ const updateJogo = async (id, jogo) => {
     SET titulo = ?, plataforma = ?, status = ?, 
         nota_pessoal = ?, tempo_jogo_minutos = ?, 
         percentual_conclusao = ?, data_lancamento = ?, 
-        capa_caminho = ?, banner_caminho = ?
+        capa_caminho = ?, banner_caminho = ?,
+        nota_metacritic = ?, tempo_estimado_hltb = ?,
+        hltb_main_extra = ?, hltb_completionist = ?
     WHERE id = ?
   `, [
     jogo.titulo, jogo.plataforma || null, jogo.status,
     jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0,
     jogo.percentual_conclusao || 0, jogo.data_lancamento || null,
-    jogo.capa_caminho || null, jogo.banner_caminho || null, id
+    jogo.capa_caminho || null, jogo.banner_caminho || null,
+    jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0,
+    jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0, id
   ]);
+
 
   await dbInstance.run('DELETE FROM jogos_generos WHERE jogo_id = ?', id);
   if (jogo.generos && Array.isArray(jogo.generos)) {
-    for (const generoId of jogo.generos) {
-      await dbInstance.run('INSERT INTO jogos_generos (jogo_id, genero_id) VALUES (?, ?)', [id, generoId]);
+    for (const item of jogo.generos) {
+      // Se for um objeto (como vem do frontend após o join), pega o .id
+      // Se for apenas o número, usa o valor direto
+      const generoId = (typeof item === 'object' && item !== null) ? item.id : item;
+      
+      if (generoId) {
+        await dbInstance.run('INSERT INTO jogos_generos (jogo_id, genero_id) VALUES (?, ?)', [id, generoId]);
+      }
     }
   }
+
   
   return id;
 };
@@ -371,14 +400,16 @@ const importData = async (data) => {
     if (data.jogos) {
       for (const jogo of data.jogos) {
         const result = await dbInstance.run(`
-          INSERT INTO jogos (titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO jogos (titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho, banner_caminho, nota_metacritic, tempo_estimado_hltb)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           jogo.titulo, jogo.plataforma || null, jogo.status, 
           jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0, 
           jogo.percentual_conclusao || 0, jogo.data_lancamento || null, 
-          jogo.capa_caminho || null
+          jogo.capa_caminho || null, jogo.banner_caminho || null,
+          jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0
         ]);
+
         
         const newJogoId = result.lastID;
         const sourceGens = jogo.generos || jogo.tags || [];

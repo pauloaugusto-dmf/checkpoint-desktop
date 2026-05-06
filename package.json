@@ -42,6 +42,7 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^6.0.1"
   },
+
   "devDependencies": {
     "@electron/rebuild": "^4.0.4",
     "@vitejs/plugin-react": "^4.2.1",

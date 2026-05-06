@@ -12,8 +12,10 @@ contextBridge.exposeInMainWorld('api', {
   getGeneros: () => ipcRenderer.invoke('generos:get'),
   addGenero: (nome) => ipcRenderer.invoke('generos:add', nome),
   exportData: () => ipcRenderer.invoke('data:export'),
-  importData: () => ipcRenderer.invoke('data:import')
+  importData: () => ipcRenderer.invoke('data:import'),
+  fetchHLTB: (titulo) => ipcRenderer.invoke('jogos:fetchHLTB', titulo)
 });
+
 
 contextBridge.exposeInMainWorld('windowControls', {
   minimize: () => ipcRenderer.invoke('window:minimize'),
