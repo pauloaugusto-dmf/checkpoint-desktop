@@ -11,6 +11,8 @@ export default function MainHeader({
       <h2 className="text-2xl font-bold text-txt-main">{activeFilter}</h2>
       <div className="flex items-center gap-3">
         {activeFilter === 'Calendário' && (
+
+
           <button 
             onClick={() => setIsEventModalOpen(true)}
             className="bg-dark-800 hover:bg-dark-700 border border-dark-600 text-txt-main px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-lg"

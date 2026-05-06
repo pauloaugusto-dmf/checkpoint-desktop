@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Gamepad2, Pause, Archive, CheckCircle2, ListMinus, Library } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 
 // Componentes
 import TitleBar from './components/TitleBar';
@@ -22,6 +23,7 @@ import ReleaseNotesModal from './components/ReleaseNotesModal';
 import { useCheckpointData } from './js/useCheckpointData';
 
 export default function App() {
+
   const {
     jogos, setJogos,
     generos,
@@ -104,8 +106,10 @@ export default function App() {
         if (editingJogo?.id) {
           await window.api.updateJogo(editingJogo.id, jogoData);
           resultId = editingJogo.id;
+          toast.success('Jogo atualizado com sucesso!');
         } else {
           resultId = await window.api.addJogo(jogoData);
+          toast.success('Jogo adicionado à sua biblioteca!');
         }
         
         const dataJogos = await window.api.getJogos();
@@ -122,19 +126,24 @@ export default function App() {
       }
     } catch (error) {
       console.error("Erro ao salvar jogo:", error);
+      toast.error('Erro ao salvar o jogo. Tente novamente.');
     }
   };
 
   const handleExcluirJogo = async (id) => {
+    // Para exclusão, ainda podemos usar o confirm nativo ou criar um modal customizado depois.
+    // Mas o feedback após a exclusão deve ser um toast.
     if (!window.confirm("Tem certeza que deseja excluir este jogo?")) return;
     try {
       if (window.api) {
         await window.api.deleteJogo(id);
         await carregarDados();
+        toast.success('Jogo removido com sucesso.');
         setIsModalOpen(false);
       }
     } catch (error) {
       console.error("Erro ao excluir jogo:", error);
+      toast.error('Não foi possível excluir o jogo.');
     }
   };
 
@@ -143,14 +152,18 @@ export default function App() {
       if (window.api?.addEvento) {
         await window.api.addEvento(eventoData);
         await carregarDados();
+        toast.success('Evento adicionado ao calendário!');
         setIsEventModalOpen(false);
       }
     } catch (error) {
       console.error("Erro ao salvar evento:", error);
+      toast.error('Erro ao salvar o evento.');
     }
   };
 
+
   const jogosFiltrados = useMemo(() => {
+
     return jogos
       .filter(jogo => {
         let matchesSidebar = false;
@@ -260,6 +273,7 @@ export default function App() {
             handleOpenAdd={handleOpenAdd}
           />
 
+
           {renderContent()}
         </main>
 
@@ -303,7 +317,15 @@ export default function App() {
         {isReleaseNotesOpen && (
           <ReleaseNotesModal onClose={() => setIsReleaseNotesOpen(false)} />
         )}
+        
+        <Toaster 
+          theme={displayMode === 'dark' ? 'dark' : 'light'} 
+          richColors 
+          closeButton 
+          position="bottom-right" 
+        />
       </div>
+
     </div>
   );
 }
