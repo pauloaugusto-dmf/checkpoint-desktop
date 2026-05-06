@@ -213,20 +213,38 @@ async function initDatabase() {
 
 const getJogos = async () => {
   if (!dbInstance) await initDatabase();
+  
+  // Busca todos os jogos
   const jogos = await dbInstance.all('SELECT * FROM jogos ORDER BY id DESC');
   
-  for (let jogo of jogos) {
-    const generos = await dbInstance.all(`
-      SELECT g.id, g.nome, g.cor
-      FROM generos g
-      JOIN jogos_generos jg ON g.id = jg.genero_id
-      WHERE jg.jogo_id = ?
-    `, jogo.id);
-    jogo.generos = generos;
-  }
-  
-  return jogos;
+  if (jogos.length === 0) return [];
+
+  // Busca todas as associações de jogos e gêneros em uma única consulta
+  const allAssociations = await dbInstance.all(`
+    SELECT jg.jogo_id, g.id, g.nome, g.cor
+    FROM generos g
+    JOIN jogos_generos jg ON g.id = jg.genero_id
+    WHERE jg.jogo_id IN (${jogos.map(j => j.id).join(',')})
+  `);
+
+  // Agrupa as associações por jogo_id
+  const genreMap = allAssociations.reduce((acc, assoc) => {
+    if (!acc[assoc.jogo_id]) acc[assoc.jogo_id] = [];
+    acc[assoc.jogo_id].push({
+      id: assoc.id,
+      nome: assoc.nome,
+      cor: assoc.cor
+    });
+    return acc;
+  }, {});
+
+  // Atribui os gêneros aos jogos correspondentes
+  return jogos.map(jogo => ({
+    ...jogo,
+    generos: genreMap[jogo.id] || []
+  }));
 };
+
 
 const addJogo = async (jogo) => {
   if (!dbInstance) await initDatabase();
