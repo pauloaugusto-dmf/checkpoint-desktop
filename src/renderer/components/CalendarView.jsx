@@ -263,7 +263,7 @@ export default function CalendarView({ jogos = [], eventos = [], onDayClick }) {
         {viewMode === 'month' ? (
           renderMonthGrid(currentYear, currentMonth, false)
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 flex-1 auto-rows-auto overflow-y-visible pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-min pb-8">
             {months.map((_, idx) => renderMonthGrid(currentYear, idx, true))}
           </div>
         )}

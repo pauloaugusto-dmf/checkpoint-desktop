@@ -303,7 +303,11 @@ export default function App() {
         {/* Modais */}
         {isModalOpen && (
           <GameModal 
-            onClose={() => setIsModalOpen(false)} 
+            key={editingJogo?.id || 'new-game-modal'}
+            onClose={() => {
+              setIsModalOpen(false);
+              setEditingJogo(null);
+            }} 
             onSave={handleSalvarJogo} 
             initialData={editingJogo}
             onDelete={handleExcluirJogo}
