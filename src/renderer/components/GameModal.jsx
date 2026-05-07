@@ -315,13 +315,37 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-txt-muted mb-1">URL da Imagem da Capa (Vertical)</label>
-              <input type="text" name="capa_caminho" value={formData.capa_caminho} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="https://exemplo.com/poster.jpg" />
+              <label className="block text-sm font-medium text-txt-muted mb-1">Imagem da Capa (Vertical)</label>
+              <div className="flex gap-2">
+                <input type="text" name="capa_caminho" value={formData.capa_caminho} onChange={handleChange} className="flex-1 bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="URL ou caminho local..." />
+                <button 
+                  type="button" 
+                  onClick={async () => {
+                    const path = await window.api.selectImage();
+                    if (path) setFormData(prev => ({ ...prev, capa_caminho: path }));
+                  }}
+                  className="px-3 bg-dark-700 hover:bg-dark-600 rounded-lg text-xs font-bold text-txt-main transition-colors border border-dark-600"
+                >
+                  Procurar...
+                </button>
+              </div>
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-medium text-txt-muted mb-1">URL da Imagem de Fundo / Banner (Horizontal)</label>
-              <input type="text" name="banner_caminho" value={formData.banner_caminho} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="https://exemplo.com/banner.jpg" />
+              <label className="block text-sm font-medium text-txt-muted mb-1">Imagem de Fundo / Banner (Horizontal)</label>
+              <div className="flex gap-2">
+                <input type="text" name="banner_caminho" value={formData.banner_caminho} onChange={handleChange} className="flex-1 bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500" placeholder="URL ou caminho local..." />
+                <button 
+                  type="button" 
+                  onClick={async () => {
+                    const path = await window.api.selectImage();
+                    if (path) setFormData(prev => ({ ...prev, banner_caminho: path }));
+                  }}
+                  className="px-3 bg-dark-700 hover:bg-dark-600 rounded-lg text-xs font-bold text-txt-main transition-colors border border-dark-600"
+                >
+                  Procurar...
+                </button>
+              </div>
             </div>
           </div>
           

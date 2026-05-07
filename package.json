@@ -22,6 +22,16 @@
       "src/assets/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "dist/hltb_service_win.exe",
+        "to": "bin/hltb_service_win.exe"
+      },
+      {
+        "from": "dist/hltb_service_linux",
+        "to": "bin/hltb_service_linux"
+      }
+    ],
     "win": {
       "target": "nsis",
       "icon": "src/assets/icon.ico"
@@ -35,7 +45,9 @@
     }
   },
   "dependencies": {
+    "axios": "^1.6.8",
     "lucide-react": "^0.378.0",
+
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sonner": "^2.0.7",

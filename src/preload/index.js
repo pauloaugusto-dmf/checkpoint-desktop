@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('api', {
   addGenero: (nome) => ipcRenderer.invoke('generos:add', nome),
   exportData: () => ipcRenderer.invoke('data:export'),
   importData: () => ipcRenderer.invoke('data:import'),
+  selectImage: () => ipcRenderer.invoke('images:select'),
   fetchHLTB: (titulo) => ipcRenderer.invoke('jogos:fetchHLTB', titulo)
 });
 
