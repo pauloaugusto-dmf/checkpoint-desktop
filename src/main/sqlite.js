@@ -97,9 +97,27 @@ async function initDatabase() {
             tempo_jogo_minutos INTEGER DEFAULT 0,
             percentual_conclusao REAL DEFAULT 0,
             data_lancamento TEXT,
-            capa_caminho TEXT
+            capa_caminho TEXT,
+            banner_caminho TEXT,
+            nota_metacritic INTEGER DEFAULT 0,
+            tempo_estimado_hltb INTEGER DEFAULT 0,
+            hltb_main_extra INTEGER DEFAULT 0,
+            hltb_completionist INTEGER DEFAULT 0
           );
-          INSERT INTO jogos_new SELECT id, titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho FROM jogos;
+          INSERT INTO jogos_new (
+            id, titulo, plataforma, status, nota_pessoal, 
+            tempo_jogo_minutos, percentual_conclusao, 
+            data_lancamento, capa_caminho, banner_caminho,
+            nota_metacritic, tempo_estimado_hltb,
+            hltb_main_extra, hltb_completionist
+          ) 
+          SELECT 
+            id, titulo, plataforma, status, nota_pessoal, 
+            tempo_jogo_minutos, percentual_conclusao, 
+            data_lancamento, capa_caminho, banner_caminho,
+            nota_metacritic, tempo_estimado_hltb,
+            hltb_main_extra, hltb_completionist
+          FROM jogos;
           DROP TABLE jogos;
           ALTER TABLE jogos_new RENAME TO jogos;
         `);
@@ -400,14 +418,21 @@ const importData = async (data) => {
     if (data.jogos) {
       for (const jogo of data.jogos) {
         const result = await dbInstance.run(`
-          INSERT INTO jogos (titulo, plataforma, status, nota_pessoal, tempo_jogo_minutos, percentual_conclusao, data_lancamento, capa_caminho, banner_caminho, nota_metacritic, tempo_estimado_hltb)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO jogos (
+            titulo, plataforma, status, nota_pessoal, 
+            tempo_jogo_minutos, percentual_conclusao, 
+            data_lancamento, capa_caminho, banner_caminho, 
+            nota_metacritic, tempo_estimado_hltb,
+            hltb_main_extra, hltb_completionist
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           jogo.titulo, jogo.plataforma || null, jogo.status, 
           jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0, 
           jogo.percentual_conclusao || 0, jogo.data_lancamento || null, 
           jogo.capa_caminho || null, jogo.banner_caminho || null,
-          jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0
+          jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0,
+          jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0
         ]);
 
         
