@@ -166,8 +166,13 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
 
             <div>
               <label className="block text-sm font-medium text-txt-muted mb-1">Plataforma</label>
-              <select name="plataforma" value={formData.plataforma} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500">
-                <option value="">Selecione...</option>
+              <select 
+                name="plataforma" 
+                value={formData.plataforma || ""} 
+                onChange={handleChange} 
+                className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500"
+              >
+                <option value="">Selecione a plataforma...</option>
                 {platforms.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
