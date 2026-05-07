@@ -15,28 +15,56 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
   const [isSyncing, setIsSyncing] = useState(false);
 
   const [formData, setFormData] = useState({
-    ...initialData,
-    titulo: initialData?.titulo || '',
-    plataforma: initialData?.plataforma || '',
-    status: initialData?.status || 'Lista de Desejos',
-    nota_pessoal: initialData?.nota_pessoal || 0,
-    percentual_conclusao: initialData?.percentual_conclusao || 0,
-    data_lancamento: initialData?.data_lancamento || '',
-    capa_caminho: initialData?.capa_caminho || '',
-    banner_caminho: initialData?.banner_caminho || '',
-    tempo_estimado_hltb: initialData?.tempo_estimado_hltb || 0,
-    hltb_horas: Math.floor((initialData?.tempo_estimado_hltb || 0) / 60),
-    hltb_minutos: (initialData?.tempo_estimado_hltb || 0) % 60,
-    tempo_jogo_minutos: initialData?.tempo_jogo_minutos || 0,
-    tempo_horas: Math.floor((initialData?.tempo_jogo_minutos || 0) / 60),
-    tempo_minutos: (initialData?.tempo_jogo_minutos || 0) % 60
+    titulo: '',
+    plataforma: '',
+    status: 'Lista de Desejos',
+    nota_pessoal: 0,
+    percentual_conclusao: 0,
+    data_lancamento: '',
+    capa_caminho: '',
+    banner_caminho: '',
+    tempo_estimado_hltb: 0,
+    hltb_horas: 0,
+    hltb_minutos: 0,
+    tempo_jogo_minutos: 0,
+    tempo_horas: 0,
+    tempo_minutos: 0
   });
 
-
-
   useEffect(() => {
-    loadGeneros();
-  }, []);
+    if (initialData) {
+      setFormData({
+        ...initialData,
+        titulo: initialData.titulo || '',
+        plataforma: String(initialData.plataforma || ''),
+        status: initialData.status || 'Lista de Desejos',
+        hltb_horas: Math.floor((initialData.tempo_estimado_hltb || 0) / 60),
+        hltb_minutos: (initialData.tempo_estimado_hltb || 0) % 60,
+        tempo_horas: Math.floor((initialData.tempo_jogo_minutos || 0) / 60),
+        tempo_minutos: (initialData.tempo_jogo_minutos || 0) % 60
+      });
+      setSelectedGeneros(initialData.generos?.map(g => g.id) || []);
+    } else {
+      // Reset para novo jogo
+      setFormData({
+        titulo: '',
+        plataforma: '',
+        status: 'Lista de Desejos',
+        nota_pessoal: 0,
+        percentual_conclusao: 0,
+        data_lancamento: '',
+        capa_caminho: '',
+        banner_caminho: '',
+        tempo_estimado_hltb: 0,
+        hltb_horas: 0,
+        hltb_minutos: 0,
+        tempo_jogo_minutos: 0,
+        tempo_horas: 0,
+        tempo_minutos: 0
+      });
+      setSelectedGeneros([]);
+    }
+  }, [initialData]);
 
   const loadGeneros = async () => {
     try {

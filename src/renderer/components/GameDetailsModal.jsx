@@ -56,7 +56,7 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
 
 
   const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
-  
+
   const formattedDate = jogo.data_lancamento 
     ? new Date(jogo.data_lancamento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
     : 'Data não definida';
@@ -109,7 +109,9 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
                 </div>
                 <div>
                   <div className="text-[10px] font-black uppercase text-txt-muted tracking-widest">Plataforma</div>
-                  <div className="text-sm font-black text-txt-main">{plataformaObj?.nome || 'PC'}</div>
+                  <div className="text-sm font-black text-txt-main">
+                    {plataformaObj ? plataformaObj.name : (jogo.plataforma || 'N/A')}
+                  </div>
                 </div>
               </div>
             </div>
