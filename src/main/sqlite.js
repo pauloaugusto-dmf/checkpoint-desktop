@@ -52,6 +52,15 @@ async function initDatabase() {
       if (!columnNames.includes('hltb_completionist')) {
         await dbInstance.run("ALTER TABLE jogos ADD COLUMN hltb_completionist INTEGER DEFAULT 0;");
       }
+      if (!columnNames.includes('banner_caminho')) {
+        await dbInstance.run("ALTER TABLE jogos ADD COLUMN banner_caminho TEXT;");
+      }
+      if (!columnNames.includes('nota_metacritic')) {
+        await dbInstance.run("ALTER TABLE jogos ADD COLUMN nota_metacritic INTEGER DEFAULT 0;");
+      }
+      if (!columnNames.includes('tempo_estimado_hltb')) {
+        await dbInstance.run("ALTER TABLE jogos ADD COLUMN tempo_estimado_hltb INTEGER DEFAULT 0;");
+      }
 
 
     // Tabela de gêneros

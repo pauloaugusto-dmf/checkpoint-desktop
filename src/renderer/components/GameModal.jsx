@@ -371,7 +371,10 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
 
       {/* Sub-modal de Seleção de Gêneros (FORA do form principal para evitar conflitos) */}
       {isSelectorOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[60] p-6 animate-in fade-in duration-200">
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[60] p-6 animate-in fade-in duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="bg-dark-800 border border-dark-700 rounded-2xl w-full max-w-xl flex flex-col max-h-[85vh] shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-dark-700 flex justify-between items-center bg-dark-900 rounded-t-2xl">
               <div className="flex items-center gap-3">
