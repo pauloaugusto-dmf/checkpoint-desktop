@@ -1,5 +1,19 @@
 export const releaseNotes = [
   {
+    version: "1.3.0",
+    date: "2026-05-07",
+    features: [
+      "⚡ Integração HLTB Nativa: A busca de tempo de jogo agora usa binários compilados, eliminando a necessidade de instalar Python no computador.",
+      "🚀 Performance Aprimorada: Respostas mais rápidas e estáveis na busca de dados do HowLongToBeat.",
+      "💻 Suporte Multiplataforma: Executáveis otimizados incluídos nativamente para Windows e Linux.",
+      "📦 Distribuição Simplificada: O instalador agora contém todos os recursos necessários para o funcionamento imediato."
+    ],
+    fixes: [
+      "Correção de dependências de sistema ao realizar buscas de metadados.",
+      "Melhoria na detecção de ambiente (Dev vs Produção) para recursos externos."
+    ]
+  },
+  {
     version: "1.2.0",
     date: "2026-05-04",
     features: [
