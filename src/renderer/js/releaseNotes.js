@@ -1,5 +1,16 @@
 export const releaseNotes = [
   {
+    version: "1.3.3",
+    date: "2026-05-08",
+    features: [
+      "🚀 Otimização de Tags: Seleção de gêneros agora é instantânea, sem atrasos ao clicar.",
+      "⚡ Estabilidade: Refatoração interna do seletor para maior fluidez."
+    ],
+    fixes: [
+      "Correção crítica: Resolvido erro de crash (tela preta) ao abrir o modal de gêneros."
+    ]
+  },
+  {
     version: "1.3.2",
     date: "2026-05-08",
     features: [

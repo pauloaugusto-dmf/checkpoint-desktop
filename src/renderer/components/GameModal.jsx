@@ -1,8 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Trash2, X, Plus, Tag as TagIcon, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { platforms } from '../js/platforms';
+
+const GenreButton = React.memo(({ gen, isSelected, onToggle }) => {
+  return (
+    <button
+      type="button"
+      onClick={() => onToggle(gen.id)}
+      className={`px-3 py-2.5 rounded-xl text-xs font-bold text-left transition-all border ${
+        isSelected
+          ? 'shadow-lg shadow-black/20'
+          : 'bg-dark-900 text-txt-muted border-dark-700 hover:border-dark-500 hover:text-txt-main'
+      }`}
+      style={isSelected ? {
+        backgroundColor: gen.cor,
+        color: '#fff',
+        borderColor: gen.cor
+      } : {}}
+    >
+      {gen.nome}
+    </button>
+  );
+});
 
 export default function GameModal({ onClose, onSave, onDelete, initialData }) {
   const isEditing = !!initialData;
@@ -79,13 +100,13 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     loadGeneros();
   }, []);
 
-  const handleToggleGenero = (generoId) => {
+  const handleToggleGenero = useCallback((generoId) => {
     setSelectedGeneros(prev => 
       prev.includes(generoId) 
         ? prev.filter(id => id !== generoId) 
         : [...prev, generoId]
     );
-  };
+  }, []);
 
   const handleAddNewGenero = async () => {
     if (!newGeneroName.trim()) return;
@@ -171,6 +192,13 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     onSave(jogoFinal);
 
   };
+
+  // Otimização: Lista filtrada de gêneros para o seletor
+  const filteredGeneros = useMemo(() => {
+    return availableGeneros.filter(gen => 
+      gen.nome.toLowerCase().includes(generoSearch.toLowerCase())
+    );
+  }, [availableGeneros, generoSearch]);
 
   return (
     <div 
@@ -492,27 +520,14 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
 
               <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {availableGeneros
-                    .filter(gen => gen.nome.toLowerCase().includes(generoSearch.toLowerCase()))
-                    .map(gen => (
-                      <button
-                        key={gen.id}
-                        type="button"
-                        onClick={() => handleToggleGenero(gen.id)}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-bold text-left transition-all border ${
-                          selectedGeneros.includes(gen.id)
-                            ? 'shadow-lg shadow-black/20'
-                            : 'bg-dark-900 text-txt-muted border-dark-700 hover:border-dark-500 hover:text-txt-main'
-                        }`}
-                        style={selectedGeneros.includes(gen.id) ? {
-                          backgroundColor: gen.cor,
-                          color: '#fff',
-                          borderColor: gen.cor
-                        } : {}}
-                      >
-                        {gen.nome}
-                      </button>
-                    ))}
+                  {filteredGeneros.map(gen => (
+                    <GenreButton 
+                      key={gen.id}
+                      gen={gen}
+                      isSelected={selectedGeneros.includes(gen.id)}
+                      onToggle={handleToggleGenero}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
