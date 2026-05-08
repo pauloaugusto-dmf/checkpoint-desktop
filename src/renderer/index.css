@@ -30,6 +30,27 @@
   }
 }
 
+/* Aceleração de hardware para elementos animados */
+.transition-transform,
+.transition-all,
+.transition-colors,
+.transition-opacity {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Suaviza o scroll em todas as áreas com overflow */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Renderização de imagens otimizada */
+img {
+  image-rendering: auto;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -48,3 +69,4 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #4f46e5;
 }
+

@@ -1,5 +1,17 @@
 export const releaseNotes = [
   {
+    version: "1.3.2",
+    date: "2026-05-08",
+    features: [
+      "🚀 Otimizações de Performance: UI muito mais fluida com memoização de componentes e aceleração de hardware (GPU).",
+      "🔍 Busca Instantânea: Adicionado debounce no campo de busca para evitar travamentos ao digitar.",
+      "⚡ Renderização Eficiente: Redução drástica de re-renders desnecessários na grade de jogos."
+    ],
+    fixes: [
+      "Melhoria na suavidade das transições e animações de hover nos cards."
+    ]
+  },
+  {
     version: "1.3.1",
     date: "2026-05-08",
     features: [],

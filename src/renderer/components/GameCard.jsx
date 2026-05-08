@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Gamepad2, Clock } from 'lucide-react';
 import { platforms } from '../js/platforms';
 
-export default function GameCard({ jogo, icon, iconColorClass, onClick }) {
+const GameCard = memo(function GameCard({ jogo, icon, iconColorClass, onClick }) {
   const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
 
   return (
-    <div onClick={onClick} className="glass rounded-xl overflow-hidden hover:scale-[1.02] transition-transform cursor-pointer group shadow-lg border border-white/5">
+    <div onClick={onClick} className="bg-dark-800/80 border border-white/5 rounded-xl overflow-hidden hover:scale-[1.02] transition-transform cursor-pointer group shadow-lg" style={{ willChange: 'transform' }}>
       <div className="h-48 bg-dark-800 relative">
         {jogo.capa_caminho ? (
           <img src={jogo.capa_caminho} alt={jogo.titulo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -82,4 +82,6 @@ export default function GameCard({ jogo, icon, iconColorClass, onClick }) {
       </div>
     </div>
   );
-}
+});
+
+export default GameCard;

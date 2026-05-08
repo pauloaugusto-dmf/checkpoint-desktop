@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { Gamepad2 } from 'lucide-react';
 import GameCard from './GameCard';
 
-export default function GameGrid({ 
+const GameGrid = memo(function GameGrid({ 
   loading, 
   jogos, 
-  statusIcons, 
+  statusIcons,
   getIconColorClass, 
   onGameClick 
 }) {
+  const handleClick = useCallback((jogo) => {
+    onGameClick(jogo);
+  }, [onGameClick]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -34,9 +38,11 @@ export default function GameGrid({
           jogo={jogo} 
           icon={statusIcons[jogo.status]} 
           iconColorClass={getIconColorClass(jogo.status)}
-          onClick={() => onGameClick(jogo)} 
+          onClick={() => handleClick(jogo)} 
         />
       ))}
     </div>
   );
-}
+});
+
+export default GameGrid;

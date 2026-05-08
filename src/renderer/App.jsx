@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Gamepad2, Pause, Archive, CheckCircle2, ListMinus, Library } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 
@@ -69,7 +69,7 @@ export default function App() {
     sky: { name: 'Céu', colors: { '500': '14 165 233', '600': '2 132 199' }, bg: 'bg-[#0ea5e9]' },
   };
 
-  const getIconColorClass = (status) => {
+  const getIconColorClass = useCallback((status) => {
     if (iconStyle === 'monochrome') return 'text-txt-muted';
     if (iconStyle === 'accent') return 'text-primary-500';
     
@@ -83,16 +83,16 @@ export default function App() {
       'default': 'text-primary-500'
     };
     return statusColors[status] || statusColors['default'];
-  };
+  }, [iconStyle]);
 
-  const statusIcons = {
+  const statusIcons = useMemo(() => ({
     'Jogando': <Gamepad2 />,
     'Pausado': <Pause />,
     'Backlog': <Archive />,
     'Completado': <CheckCircle2 />,
     'Abandonado': <ListMinus />,
     'Lista de Desejos': <Library />,
-  };
+  }), []);
 
   const handleOpenAdd = () => {
     setEditingJogo(null);
@@ -217,6 +217,11 @@ export default function App() {
       });
   }, [jogos, activeFilter, searchTerm, filterStatus, filterGenero, sortBy]);
 
+  const handleGameClick = useCallback((jogo) => {
+    setEditingJogo(jogo);
+    setIsDetailsModalOpen(true);
+  }, []);
+
   const renderContent = () => {
     switch (activeFilter) {
       case 'Calendário':
@@ -266,10 +271,7 @@ export default function App() {
               jogos={jogosFiltrados} 
               statusIcons={statusIcons}
               getIconColorClass={getIconColorClass}
-              onGameClick={(jogo) => {
-                setEditingJogo(jogo);
-                setIsDetailsModalOpen(true);
-              }}
+              onGameClick={handleGameClick}
             />
           </div>
         );

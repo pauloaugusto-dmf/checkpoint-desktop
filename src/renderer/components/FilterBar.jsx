@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
-export default function FilterBar({ 
+const FilterBar = memo(function FilterBar({ 
   searchTerm, 
   setSearchTerm, 
   filterStatus, 
@@ -12,6 +12,22 @@ export default function FilterBar({
   sortBy, 
   setSortBy 
 }) {
+  // Estado local para o input — evita re-filtrar a cada tecla
+  const [localSearch, setLocalSearch] = useState(searchTerm);
+
+  // Debounce: só propaga a busca 300ms após o usuário parar de digitar
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchTerm(localSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [localSearch, setSearchTerm]);
+
+  // Sincroniza se o pai limpar o searchTerm externamente
+  useEffect(() => {
+    if (searchTerm === '') setLocalSearch('');
+  }, [searchTerm]);
+
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-dark-800/50 p-4 rounded-2xl border border-dark-700/50 backdrop-blur-sm sticky top-0 z-10">
       <div className="flex-1 relative max-w-md">
@@ -19,8 +35,8 @@ export default function FilterBar({
         <input 
           type="text" 
           placeholder="Buscar jogo..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
           className="w-full bg-dark-900 border border-dark-700 rounded-xl py-2 pl-10 pr-4 text-sm text-txt-main focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all"
         />
       </div>
@@ -65,4 +81,6 @@ export default function FilterBar({
       </div>
     </div>
   );
-}
+});
+
+export default FilterBar;
