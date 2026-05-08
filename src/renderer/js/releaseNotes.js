@@ -1,5 +1,13 @@
 export const releaseNotes = [
   {
+    version: "1.3.1",
+    date: "2026-05-08",
+    features: [],
+    fixes: [
+      "Correção crítica: As tags de gênero voltaram a aparecer nos cards e no modal de edição de jogos."
+    ]
+  },
+  {
     version: "1.3.0",
     date: "2026-05-07",
     features: [

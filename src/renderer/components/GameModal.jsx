@@ -75,6 +75,10 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     }
   };
 
+  useEffect(() => {
+    loadGeneros();
+  }, []);
+
   const handleToggleGenero = (generoId) => {
     setSelectedGeneros(prev => 
       prev.includes(generoId) 
