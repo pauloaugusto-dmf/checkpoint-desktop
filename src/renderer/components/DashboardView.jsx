@@ -92,7 +92,7 @@ function PriorityBannerCard({ jogo, onGameClick, statusIcons, getIconColorClass 
               {jogo.plataforma || 'N/A'}
             </span>
           )}
-          <h4 className="text-4xl font-black text-white line-clamp-1 leading-none group-hover:text-primary-300 transition-colors drop-shadow-2xl tracking-tighter">{jogo.titulo}</h4>
+          <h4 className="text-2xl font-black text-white line-clamp-2 leading-tight group-hover:text-primary-300 transition-colors drop-shadow-2xl tracking-tight">{jogo.titulo}</h4>
         </div>
         
         {/* Info Grid Premium */}
