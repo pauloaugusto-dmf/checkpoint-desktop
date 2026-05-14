@@ -1,5 +1,14 @@
 export const releaseNotes = [
   {
+    version: "1.3.6",
+    date: "2026-05-14",
+    features: [
+      "🔥 Foco Final 2.0: Redesign da seção de prioridades com cards gigantes e ultra detalhados para os 2 jogos mais próximos de zerar.",
+      "📊 Insights Detalhados: Adição de nota pessoal e progresso detalhado diretamente nos banners de prioridade."
+    ],
+    fixes: []
+  },
+  {
     version: "1.3.5",
     date: "2026-05-13",
     features: [

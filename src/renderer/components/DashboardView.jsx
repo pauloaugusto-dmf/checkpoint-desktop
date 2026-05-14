@@ -56,6 +56,83 @@ function MiniBannerCard({ jogo, onGameClick, statusIcons, getIconColorClass }) {
   );
 }
 
+function PriorityBannerCard({ jogo, onGameClick, statusIcons, getIconColorClass }) {
+  const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
+  return (
+    <div 
+      onClick={() => onGameClick(jogo)}
+      className="relative rounded-3xl overflow-hidden border border-white/10 group hover:border-primary-500/50 transition-all duration-500 cursor-pointer flex flex-col justify-end p-7 shadow-2xl min-h-[220px] flex-1"
+    >
+      {/* Background Image */}
+      <div className="absolute inset-0 bg-dark-900">
+        {jogo.capa_caminho ? (
+          <img src={jogo.capa_caminho} alt={jogo.titulo} className="w-full h-full object-cover opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-1000" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"><Gamepad2 className="w-20 h-20 text-dark-700" /></div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-dark-900/40 to-transparent"></div>
+      </div>
+
+      {/* Top Right Status Badge */}
+      <div className="absolute top-5 right-5 bg-dark-900/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/10 flex items-center gap-2.5 z-10 shadow-xl">
+        {statusIcons[jogo.status] && React.cloneElement(statusIcons[jogo.status], { className: `w-4 h-4 ${getIconColorClass(jogo.status)}` })}
+        <span className="text-[11px] font-black text-txt-main uppercase tracking-[0.15em]">{jogo.status}</span>
+      </div>
+
+      {/* Content Overlay */}
+      <div className="relative z-10 flex flex-col gap-5">
+        <div className="flex flex-col gap-3">
+          {plataformaObj ? (
+            <span className="text-[10px] font-black px-3 py-1 rounded-xl shadow-lg w-max uppercase tracking-[0.2em]" style={{ backgroundColor: plataformaObj.bgColor, color: plataformaObj.color }}>
+              {plataformaObj.name}
+            </span>
+          ) : (
+            <span className="text-[10px] font-black px-3 py-1 rounded-xl bg-dark-700 text-txt-muted w-max uppercase tracking-[0.2em]">
+              {jogo.plataforma || 'N/A'}
+            </span>
+          )}
+          <h4 className="text-4xl font-black text-white line-clamp-1 leading-none group-hover:text-primary-300 transition-colors drop-shadow-2xl tracking-tighter">{jogo.titulo}</h4>
+        </div>
+        
+        {/* Info Grid Premium */}
+        <div className="grid grid-cols-2 gap-6 pt-5 border-t border-white/10">
+          <div className="flex flex-col gap-1.5">
+             <span className="text-[10px] text-txt-muted font-black uppercase tracking-[0.2em]">Tempo de Jogo</span>
+             <div className="flex items-center gap-2 text-white font-black text-lg">
+                <Clock className="w-5 h-5 text-primary-400" />
+                <span>{Math.floor((jogo.tempo_jogo_minutos || 0) / 60)}h</span>
+             </div>
+          </div>
+          <div className="flex flex-col gap-1.5 items-end text-right">
+             <span className="text-[10px] text-txt-muted font-black uppercase tracking-[0.2em]">Nota Pessoal</span>
+             <div className="flex items-center gap-2 text-white font-black text-lg">
+                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                <span>{jogo.nota_pessoal || '0'}/10</span>
+             </div>
+          </div>
+        </div>
+
+        {/* Progress Section */}
+        <div className="bg-dark-900/40 backdrop-blur-sm p-4 rounded-2xl border border-white/5">
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-[11px] text-primary-400 font-black uppercase tracking-[0.2em]">Progresso da Campanha</span>
+            <span className="text-base font-black text-white">{(jogo.percentual_conclusao || 0)}%</span>
+          </div>
+          <div className="h-2.5 bg-dark-800 rounded-full overflow-hidden p-0.5 border border-white/5 shadow-inner">
+            <div 
+              className="h-full bg-gradient-to-r from-primary-600 to-primary-400 rounded-full relative" 
+              style={{ width: `${jogo.percentual_conclusao || 0}%` }}
+            >
+              <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardView({ jogos, eventos, onGameClick, statusIcons, getIconColorClass }) {
   
   // 1. Hero Section (Carrossel)
@@ -103,7 +180,7 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
     return jogos
       .filter(j => (j.status === 'Pausado' || j.status === 'Jogando') && (j.percentual_conclusao || 0) >= 60 && (j.percentual_conclusao || 0) < 100)
       .sort((a, b) => (b.percentual_conclusao || 0) - (a.percentual_conclusao || 0))
-      .slice(0, 4);
+      .slice(0, 2);
   }, [jogos]);
 
   // 3. Fila Dinâmica (Pausados e Backlog)
@@ -335,9 +412,9 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
                   <h3 className="text-xl font-black text-txt-main tracking-wide">Foco Final (Quase Lá)</h3>
                 </div>
               </div>
-              <div className="grid grid-cols-2 grid-rows-2 gap-5 flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
                 {prioridades.map(jogo => (
-                  <MiniBannerCard 
+                  <PriorityBannerCard 
                     key={jogo.id} 
                     jogo={jogo} 
                     onGameClick={onGameClick} 
