@@ -11,6 +11,7 @@ import GameGrid from './components/GameGrid';
 import CalendarView from './components/CalendarView';
 import SettingsView from './components/SettingsView';
 import StatisticsView from './components/StatisticsView';
+import DashboardView from './components/DashboardView';
 
 // Modais
 import GameModal from './components/GameModal';
@@ -40,7 +41,7 @@ export default function App() {
   } = useCheckpointData();
 
   // Estados de UI locais
-  const [activeFilter, setActiveFilter] = useState('Todos os Jogos');
+  const [activeFilter, setActiveFilter] = useState('Dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sectionsExpanded, setSectionsExpanded] = useState({ library: true, smart: true, tools: true });
   
@@ -224,6 +225,16 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeFilter) {
+      case 'Dashboard':
+        return (
+          <DashboardView 
+            jogos={jogos} 
+            eventos={eventos} 
+            onGameClick={handleGameClick}
+            statusIcons={statusIcons}
+            getIconColorClass={getIconColorClass}
+          />
+        );
       case 'Calendário':
         return (
           <CalendarView 

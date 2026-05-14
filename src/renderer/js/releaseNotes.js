@@ -1,5 +1,18 @@
 export const releaseNotes = [
   {
+    version: "1.3.4",
+    date: "2026-05-13",
+    features: [
+      "🌟 Redesign da Fila Dinâmica: Nova matriz quadrada 2x2 preenchendo integralmente o espaço lateral com cards no estilo mini-banner imersivo.",
+      "🎲 Interatividade no Backlog: Adicionado botão manual para rolar e sortear instantaneamente outra sugestão na Roleta do Destino.",
+      "⚡ Experiência Fluida: Reset automático do temporizador do carrossel ao interagir manualmente nas abas."
+    ],
+    fixes: [
+      "📅 Radar Preciso: Ajuste do fuso horário local para garantir que lançamentos e eventos do dia atual fiquem visíveis até a meia-noite.",
+      "Formatação robusta no dia e mês dos eventos para maior compatibilidade regional."
+    ]
+  },
+  {
     version: "1.3.3",
     date: "2026-05-08",
     features: [

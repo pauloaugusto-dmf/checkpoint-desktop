@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gamepad2, LayoutGrid, Pause, Archive, CheckCircle2, ListMinus, Library, CalendarDays, BarChart3, Settings, Sparkles, TrendingUp, Star, Clock, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Gamepad2, LayoutGrid, Pause, Archive, CheckCircle2, ListMinus, Library, CalendarDays, BarChart3, Settings, Sparkles, TrendingUp, Star, Clock, ChevronLeft, ChevronRight, ChevronDown, Home } from 'lucide-react';
 import NavItem from './NavItem';
 
 export default function Sidebar({ 
@@ -13,6 +13,7 @@ export default function Sidebar({
   setIsReleaseNotesOpen
 }) {
   const menuIcons = {
+    'Dashboard': <Home />,
     'Todos os Jogos': <LayoutGrid />,
     'Jogando': <Gamepad2 />,
     'Pausado': <Pause />,
@@ -47,13 +48,22 @@ export default function Sidebar({
       <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto custom-scrollbar pb-10">
         <div className={isCollapsed ? 'mb-2' : 'mb-6'}>
           <NavItem 
+            icon={menuIcons['Dashboard']} 
+            label="Dashboard" 
+            active={activeFilter === 'Dashboard'} 
+            onClick={() => setActiveFilter('Dashboard')} 
+            isCollapsed={isCollapsed}
+            colorClass="text-primary-500"
+            className={`border-primary-500/20 ${isCollapsed ? 'bg-transparent border-0 mb-1' : 'bg-primary-500/5 border py-3 mb-2'}`}
+          />
+          <NavItem 
             icon={menuIcons['Calendário']} 
             label="Calendário" 
             active={activeFilter === 'Calendário'} 
             onClick={() => setActiveFilter('Calendário')} 
             isCollapsed={isCollapsed}
-            colorClass="text-primary-500"
-            className={`border-primary-500/20 ${isCollapsed ? 'bg-transparent border-0' : 'bg-primary-500/5 border py-3'}`}
+            colorClass="text-amber-500"
+            className={`border-amber-500/20 ${isCollapsed ? 'bg-transparent border-0' : 'bg-amber-500/5 border py-3'}`}
           />
         </div>
 
