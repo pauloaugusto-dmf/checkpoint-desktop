@@ -3,7 +3,7 @@ export const releaseNotes = [
     version: "1.3.4",
     date: "2026-05-13",
     features: [
-      "🌟 Redesign da Fila Dinâmica: Nova matriz quadrada 2x2 preenchendo integralmente o espaço lateral com cards no estilo mini-banner imersivo.",
+      "🌟 Padronização Visual Premium: As seções 'Foco Final' e 'Desenterrando da Fila' agora utilizam uma matriz quadrada 2x2 imersiva com cards customizados no estilo mini-banner.",
       "🎲 Interatividade no Backlog: Adicionado botão manual para rolar e sortear instantaneamente outra sugestão na Roleta do Destino.",
       "⚡ Experiência Fluida: Reset automático do temporizador do carrossel ao interagir manualmente nas abas."
     ],

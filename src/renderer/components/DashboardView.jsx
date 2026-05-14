@@ -3,6 +3,59 @@ import { Gamepad2, Flame, CalendarDays, Dice5, Clock, Trophy, Play, Library, Spa
 import GameCard from './GameCard';
 import { platforms } from '../js/platforms';
 
+function MiniBannerCard({ jogo, onGameClick, statusIcons, getIconColorClass }) {
+  const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
+  return (
+    <div 
+      onClick={() => onGameClick(jogo)}
+      className="relative rounded-2xl overflow-hidden border border-white/5 group hover:border-primary-500/50 transition-all cursor-pointer flex flex-col justify-end p-4 shadow-lg min-h-[140px] flex-1"
+    >
+      {/* Background Image */}
+      <div className="absolute inset-0 bg-dark-800">
+        {jogo.capa_caminho ? (
+          <img src={jogo.capa_caminho} alt={jogo.titulo} className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-105 transition-all duration-500" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"><Gamepad2 className="w-12 h-12 text-dark-600" /></div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent"></div>
+      </div>
+
+      {/* Top Right Status Badge */}
+      <div className="absolute top-3 right-3 bg-dark-900/80 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1.5 z-10">
+        {statusIcons[jogo.status] && React.cloneElement(statusIcons[jogo.status], { className: `w-3.5 h-3.5 ${getIconColorClass(jogo.status)}` })}
+        <span className="text-[10px] font-bold text-txt-main">{jogo.status}</span>
+      </div>
+
+      {/* Content Overlay */}
+      <div className="relative z-10 flex flex-col gap-1.5">
+        {plataformaObj ? (
+          <span className="text-[9px] font-black px-2 py-0.5 rounded shadow-sm w-max uppercase tracking-wider" style={{ backgroundColor: plataformaObj.bgColor, color: plataformaObj.color }}>
+            {plataformaObj.name}
+          </span>
+        ) : (
+          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-dark-700 text-txt-muted w-max uppercase tracking-wider">
+            {jogo.plataforma || 'N/A'}
+          </span>
+        )}
+        <h4 className="text-base font-black text-white line-clamp-2 leading-tight group-hover:text-primary-300 transition-colors">{jogo.titulo}</h4>
+        
+        {/* Tempo e Progresso na mesma linha */}
+        <div className="flex items-center justify-between gap-2 mt-1 pt-1.5 border-t border-white/10 text-[11px] font-bold text-gray-300">
+          <span className="flex items-center gap-1">
+            <Clock className="w-3 h-3 text-txt-muted" />
+            {Math.floor((jogo.tempo_jogo_minutos || 0) / 60)}h
+          </span>
+          {jogo.percentual_conclusao !== undefined && (
+            <span className="text-primary-400 font-extrabold">
+              {jogo.percentual_conclusao}%
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardView({ jogos, eventos, onGameClick, statusIcons, getIconColorClass }) {
   
   // 1. Hero Section (Carrossel)
@@ -273,8 +326,8 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
           
           {/* 2. Quase lá (Prioridades) */}
           {prioridades.length > 0 && (
-            <section className="bg-dark-800/50 backdrop-blur-xl border border-white/5 p-7 rounded-3xl shadow-xl">
-              <div className="flex items-center justify-between mb-5">
+            <section className="bg-dark-800/50 backdrop-blur-xl border border-white/5 p-7 rounded-3xl shadow-xl flex-1 flex flex-col">
+              <div className="flex items-center justify-between mb-5 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="bg-rose-500/20 p-2 rounded-xl border border-rose-500/30">
                     <Flame className="w-5 h-5 text-rose-500" />
@@ -282,14 +335,14 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
                   <h3 className="text-xl font-black text-txt-main tracking-wide">Foco Final (Quase Lá)</h3>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-2 grid-rows-2 gap-5 flex-1">
                 {prioridades.map(jogo => (
-                  <GameCard 
+                  <MiniBannerCard 
                     key={jogo.id} 
                     jogo={jogo} 
-                    icon={statusIcons[jogo.status]} 
-                    iconColorClass={getIconColorClass(jogo.status)}
-                    onClick={() => onGameClick(jogo)} 
+                    onGameClick={onGameClick} 
+                    statusIcons={statusIcons} 
+                    getIconColorClass={getIconColorClass} 
                   />
                 ))}
               </div>
@@ -299,7 +352,7 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
           {/* 3. Fila Dinâmica (Pausados e Backlog) */}
           {displayedFila.length > 0 && (
             <section className="bg-dark-800/50 backdrop-blur-xl border border-white/5 p-7 rounded-3xl shadow-xl flex-1 flex flex-col">
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between mb-5 shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="bg-blue-500/20 p-2 rounded-xl border border-blue-500/30">
                     <Library className="w-5 h-5 text-blue-400" />
@@ -319,59 +372,15 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
                 </button>
               </div>
               <div className="grid grid-cols-2 grid-rows-2 gap-5 flex-1">
-                {displayedFila.map(jogo => {
-                  const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
-                  return (
-                    <div 
-                      key={jogo.id}
-                      onClick={() => onGameClick(jogo)}
-                      className="relative rounded-2xl overflow-hidden border border-white/5 group hover:border-primary-500/50 transition-all cursor-pointer flex flex-col justify-end p-4 shadow-lg min-h-[140px]"
-                    >
-                      {/* Background Image */}
-                      <div className="absolute inset-0 bg-dark-800">
-                        {jogo.capa_caminho ? (
-                          <img src={jogo.capa_caminho} alt={jogo.titulo} className="w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-105 transition-all duration-500" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"><Gamepad2 className="w-12 h-12 text-dark-600" /></div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent"></div>
-                      </div>
-
-                      {/* Top Right Status Badge */}
-                      <div className="absolute top-3 right-3 bg-dark-900/80 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10 flex items-center gap-1.5 z-10">
-                        {statusIcons[jogo.status] && React.cloneElement(statusIcons[jogo.status], { className: `w-3.5 h-3.5 ${getIconColorClass(jogo.status)}` })}
-                        <span className="text-[10px] font-bold text-txt-main">{jogo.status}</span>
-                      </div>
-
-                      {/* Content Overlay */}
-                      <div className="relative z-10 flex flex-col gap-1.5">
-                        {plataformaObj ? (
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded shadow-sm w-max uppercase tracking-wider" style={{ backgroundColor: plataformaObj.bgColor, color: plataformaObj.color }}>
-                            {plataformaObj.name}
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded bg-dark-700 text-txt-muted w-max uppercase tracking-wider">
-                            {jogo.plataforma || 'N/A'}
-                          </span>
-                        )}
-                        <h4 className="text-base font-black text-white line-clamp-2 leading-tight group-hover:text-primary-300 transition-colors">{jogo.titulo}</h4>
-                        
-                        {/* Tempo e Progresso na mesma linha */}
-                        <div className="flex items-center justify-between gap-2 mt-1 pt-1.5 border-t border-white/10 text-[11px] font-bold text-gray-300">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-txt-muted" />
-                            {Math.floor((jogo.tempo_jogo_minutos || 0) / 60)}h
-                          </span>
-                          {jogo.percentual_conclusao !== undefined && (
-                            <span className="text-primary-400 font-extrabold">
-                              {jogo.percentual_conclusao}%
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {displayedFila.map(jogo => (
+                  <MiniBannerCard 
+                    key={jogo.id} 
+                    jogo={jogo} 
+                    onGameClick={onGameClick} 
+                    statusIcons={statusIcons} 
+                    getIconColorClass={getIconColorClass} 
+                  />
+                ))}
               </div>
             </section>
           )}
