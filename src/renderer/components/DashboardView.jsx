@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { Gamepad2, Flame, CalendarDays, Dice5, Clock, Trophy, Play, Library, Sparkles, ChevronLeft, ChevronRight, RefreshCw, Star } from 'lucide-react';
 import GameCard from './GameCard';
 import { platforms } from '../js/platforms';
+import { getLocalDateString, formatDayMonth, calculateDaysLeft } from '../js/dateUtils';
 
 function MiniBannerCard({ jogo, onGameClick, statusIcons, getIconColorClass }) {
   const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
@@ -133,6 +134,8 @@ function PriorityBannerCard({ jogo, onGameClick, statusIcons, getIconColorClass 
   );
 }
 
+
+
 export default function DashboardView({ jogos, eventos, onGameClick, statusIcons, getIconColorClass }) {
   
   // 1. Hero Section (Carrossel)
@@ -206,12 +209,7 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
     return () => clearInterval(interval);
   }, [shuffleFila]);
 
-  // 4. Radar de Lançamentos e Eventos (Próximos 45 dias separados)
-  // Helper para obter a data local no formato YYYY-MM-DD
-  const getLocalDateString = (dateObj = new Date()) => {
-    return new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
-  };
-
+  // 4. Radar de Lançamentos e Eventos
   const { radarLancamentos, radarEventos } = useMemo(() => {
     const today = getLocalDateString();
     const nextMonthDate = new Date();
@@ -231,7 +229,11 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
     return { radarLancamentos: proximosLancamentos, radarEventos: proximosEventos };
   }, [jogos, eventos]);
 
-  // 5. Roleta do Backlog
+  // 5. Cálculo de Dead-line
+  const proximoLancamento = useMemo(() => radarLancamentos[0] || null, [radarLancamentos]);
+  const diasAteProximo = useMemo(() => proximoLancamento ? calculateDaysLeft(proximoLancamento.data_lancamento) : 0, [proximoLancamento]);
+
+  // 6. Roleta do Backlog
   const [roletaGame, setRoletaGame] = useState(null);
 
   const girarRoleta = useCallback(() => {
@@ -262,7 +264,7 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
     });
   }, [jogos]);
 
-  // 6. Insights
+  // 7. Insights
   const stats = useMemo(() => {
     const completed = jogos.filter(j => j.status === 'Completado').length;
     const backlogCount = jogos.filter(j => j.status === 'Backlog').length;
@@ -270,26 +272,6 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
     const totalHoras = Math.floor(totalMinutos / 60);
     return { completed, backlogCount, totalHoras };
   }, [jogos]);
-
-  const formatDayMonth = (dateString) => {
-    if (!dateString) return { text: '', day: '', month: '' };
-    const date = new Date(dateString + 'T00:00:00');
-    const day = date.toLocaleDateString('pt-BR', { day: '2-digit' });
-    const monthText = date.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
-    return {
-      text: `${day} de ${monthText}`,
-      day,
-      month: monthText
-    };
-  };
-
-  const calculateDaysLeft = (dateString) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const eventDate = new Date(dateString + 'T00:00:00');
-    const diffTime = eventDate - today;
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
 
   return (
     <div className="flex-1 overflow-y-auto p-8 relative flex flex-col gap-8 custom-scrollbar">
@@ -299,9 +281,10 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
         <section className="relative w-full h-[550px] lg:h-[650px] 2xl:h-[75vh] min-h-[600px] rounded-[32px] overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.6)] group bg-dark-900 border border-white/5">
           {jogandoGames.map((jogo, index) => {
             const isActive = index === currentHeroIndex;
+
             return (
               <div 
-                key={jogo.id}
+                key={jogo.id || index}
                 className={`absolute inset-0 transition-opacity duration-1000 ease-in-out cursor-pointer flex flex-col justify-end p-8 md:p-12 lg:p-20 ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                 onClick={() => onGameClick(jogo)}
               >
@@ -309,7 +292,7 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
                 <div className="absolute inset-0">
                   <img 
                     src={jogo.banner_caminho || jogo.capa_caminho} 
-                    alt={jogo.titulo} 
+                    alt={jogo.titulo || 'Jogo'} 
                     className={`w-full h-full object-cover transition-transform duration-[15000ms] ease-out ${isActive ? 'scale-105' : 'scale-100'}`}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent"></div>
@@ -338,24 +321,26 @@ export default function DashboardView({ jogos, eventos, onGameClick, statusIcons
                     </div>
                     
                     <div className="w-full">
-                      <h2 className="text-5xl lg:text-7xl font-black text-white mb-4 lg:mb-6 drop-shadow-xl tracking-tight leading-none line-clamp-2">{jogo.titulo}</h2>
+                      <h2 className="text-5xl lg:text-7xl font-black text-white mb-4 lg:mb-6 drop-shadow-xl tracking-tight leading-none line-clamp-2">{jogo.titulo || 'Sem Título'}</h2>
                       <div className="inline-flex flex-wrap items-center gap-4 lg:gap-6 text-sm lg:text-base text-gray-200 font-medium bg-dark-900/60 px-5 lg:px-6 py-2.5 lg:py-3 rounded-xl backdrop-blur-md border border-white/5 shadow-lg">
-                        <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-txt-muted"/> <span className="font-bold">{Math.floor((jogo.tempo_jogo_minutos || 0) / 60)}h</span> jogadas</span>
+                        <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-txt-muted"/> <span className="font-bold">{Math.floor(((jogo && jogo.tempo_jogo_minutos) || 0) / 60)}h</span> jogadas</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-dark-600"></span>
-                        <span className="flex items-center gap-2"><Trophy className="w-4 h-4 text-yellow-500"/> <span className="font-bold">{(jogo.percentual_conclusao || 0)}%</span> concluído</span>
+                        <span className="flex items-center gap-2"><Trophy className="w-4 h-4 text-yellow-500"/> <span className="font-bold">{(jogo && jogo.percentual_conclusao) || 0}%</span> concluído</span>
                         <span className="w-1.5 h-1.5 rounded-full bg-dark-600"></span>
-                        <span className="font-black tracking-widest text-xs uppercase text-primary-300">{jogo.plataforma || 'N/A'}</span>
+                        <span className="font-black tracking-widest text-xs uppercase text-primary-300">{(jogo && jogo.plataforma) || 'N/A'}</span>
                       </div>
                     </div>
 
-                  <div className="w-full max-w-2xl mt-2 group-hover:scale-[1.02] transition-transform origin-left">
-                      <div className="flex justify-between text-xs lg:text-sm font-bold text-txt-muted mb-1.5 px-1">
-                        <span className="uppercase tracking-widest">Progresso da Campanha</span>
-                        <span className="text-primary-400 font-black">{(jogo.percentual_conclusao || 0)}%</span>
-                      </div>
-                      <div className="h-3 lg:h-4 bg-dark-800/80 rounded-full overflow-hidden backdrop-blur-sm border border-white/10 shadow-inner">
-                        <div className="h-full bg-gradient-to-r from-primary-600 to-primary-400 rounded-full relative" style={{ width: `${jogo.percentual_conclusao || 0}%` }}>
-                          <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                    <div className="w-full max-w-4xl mt-4">
+                      <div className="w-full max-w-2xl group-hover:scale-[1.02] transition-transform origin-left">
+                        <div className="flex justify-between text-xs lg:text-sm font-bold text-txt-muted mb-1.5 px-1">
+                          <span className="uppercase tracking-widest">Progresso da Campanha</span>
+                          <span className="text-primary-400 font-black">{(jogo && jogo.percentual_conclusao) || 0}%</span>
+                        </div>
+                        <div className="h-3 lg:h-4 bg-dark-800/80 rounded-full overflow-hidden backdrop-blur-sm border border-white/10 shadow-inner">
+                          <div className="h-full bg-gradient-to-r from-primary-600 to-primary-400 rounded-full relative" style={{ width: `${(jogo && jogo.percentual_conclusao) || 0}%` }}>
+                            <div className="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -22,6 +22,7 @@ import ReleaseNotesModal from './components/ReleaseNotesModal';
 
 // Hooks e Utils
 import { useCheckpointData } from './js/useCheckpointData';
+import { getLocalDateString } from './js/dateUtils';
 
 export default function App() {
 
@@ -94,6 +95,20 @@ export default function App() {
     'Abandonado': <ListMinus />,
     'Lista de Desejos': <Library />,
   }), []);
+
+  // Cálculo do Próximo Lançamento (para Insights)
+  const proximoLancamento = useMemo(() => {
+    const today = getLocalDateString();
+    const nextMonthDate = new Date();
+    nextMonthDate.setDate(nextMonthDate.getDate() + 45);
+    const nextMonth = getLocalDateString(nextMonthDate);
+
+    const proximos = jogos
+      .filter(j => j.data_lancamento && j.data_lancamento >= today && j.data_lancamento <= nextMonth)
+      .sort((a, b) => a.data_lancamento.localeCompare(b.data_lancamento));
+    
+    return proximos.length > 0 ? proximos[0] : null;
+  }, [jogos]);
 
   const handleOpenAdd = () => {
     setEditingJogo(null);
@@ -352,6 +367,7 @@ export default function App() {
             onUpdate={handleQuickUpdate}
             icon={statusIcons[editingJogo.status]}
             iconColorClass={getIconColorClass(editingJogo.status)}
+            proximoLancamento={proximoLancamento}
           />
 
         )}

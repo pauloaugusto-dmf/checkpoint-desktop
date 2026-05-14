@@ -1,5 +1,18 @@
 export const releaseNotes = [
   {
+    version: "1.3.7",
+    date: "2026-05-14",
+    features: [
+      "🎯 Missão de Produtividade: Novo insight calculado que mostra quanto tempo você precisa jogar por dia para terminar o jogo atual antes do próximo lançamento do seu radar.",
+      "📱 Experiência Contextual: O cálculo de produtividade agora vive diretamente na tela de detalhes do jogo para uma consulta rápida enquanto você decide o que jogar.",
+      "🧹 Código Limpo: Refatoração interna com utilitários de data centralizados para maior estabilidade e performance."
+    ],
+    fixes: [
+      "🔧 Correção de Sintaxe: Ajuste crítico em tags JSX que impedia a inicialização do dashboard em algumas condições.",
+      "✨ Melhoria de Carregamento: Renderização do carrossel otimizada e mais robusta contra dados ausentes."
+    ]
+  },
+  {
     version: "1.3.6",
     date: "2026-05-14",
     features: [

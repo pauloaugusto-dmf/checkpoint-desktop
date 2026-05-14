@@ -1,11 +1,12 @@
-import React from 'react';
-import { X, Calendar, Clock, Star, Gamepad2, CheckCircle2, ListMinus, Library, Archive, Pause, Edit3, Trash2, Search, Loader2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { X, Calendar, Clock, Star, Gamepad2, CheckCircle2, ListMinus, Library, Archive, Pause, Edit3, Trash2, Search, Loader2, Sparkles, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { platforms } from '../js/platforms';
+import { calculateDaysLeft } from '../js/dateUtils';
 
-export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon, iconColorClass }) {
-  const [isSyncing, setIsSyncing] = React.useState(false);
+export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon, iconColorClass, proximoLancamento }) {
+  const [isSyncing, setIsSyncing] = useState(false);
 
   if (!jogo) return null;
 
@@ -63,6 +64,30 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
 
   const horas = Math.floor((jogo.tempo_jogo_minutos || 0) / 60);
   const minutos = (jogo.tempo_jogo_minutos || 0) % 60;
+
+  // Cálculo da Meta Diária (Insight de Produtividade)
+  const metaDiaria = useMemo(() => {
+    if (jogo.status !== 'Jogando') return null;
+    if (!proximoLancamento || !jogo.percentual_conclusao || jogo.percentual_conclusao >= 100) return null;
+
+    const diasRestantes = calculateDaysLeft(proximoLancamento.data_lancamento);
+    if (diasRestantes <= 0) return null;
+
+    const tempoAtual = jogo.tempo_jogo_minutos || 0;
+    const percentual = jogo.percentual_conclusao;
+    
+    // Estimativa: se 9h = 50%, então 100% = 18h. Faltam 9h.
+    const tempoTotalEstimado = (tempoAtual / percentual) * 100;
+    const tempoRestanteMin = tempoTotalEstimado - tempoAtual;
+    const minPorDia = tempoRestanteMin / diasRestantes;
+
+    return {
+      horas: Math.floor(minPorDia / 60),
+      minutos: Math.round(minPorDia % 60),
+      dias: diasRestantes,
+      proximoTitulo: proximoLancamento.titulo
+    };
+  }, [jogo, proximoLancamento]);
 
   return (
     <div 
@@ -209,6 +234,32 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
                 </div>
               </div>
             </div>
+            
+            {/* Meta Diária / Insight de Produtividade */}
+            {metaDiaria && (
+              <div className="bg-primary-500/10 border border-primary-500/20 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-8 animate-in slide-in-from-bottom-4 duration-700">
+                <div className="w-16 h-16 rounded-full bg-primary-500/20 flex items-center justify-center border border-primary-500/30 shrink-0">
+                  <Sparkles className="w-8 h-8 text-primary-400 animate-pulse" />
+                </div>
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary-300 mb-1">Missão de Produtividade</h3>
+                  <p className="text-txt-main text-lg font-bold leading-tight">
+                    Para terminar <span className="text-white">"{jogo.titulo}"</span> antes do lançamento de <span className="text-primary-400">{metaDiaria.proximoTitulo}</span> ({metaDiaria.dias} dias), você precisa jogar:
+                  </p>
+                </div>
+                <div className="bg-dark-900/80 px-8 py-6 rounded-3xl border border-white/10 shadow-2xl min-w-[200px]">
+                  <div className="text-3xl font-black text-white flex items-baseline gap-1 justify-center">
+                    {metaDiaria.horas > 0 && (
+                      <>
+                        {metaDiaria.horas}<span className="text-sm text-primary-400 uppercase mr-2">h</span>
+                      </>
+                    )}
+                    {metaDiaria.minutos}<span className="text-sm text-primary-400 uppercase">m</span>
+                  </div>
+                  <div className="text-[10px] font-black text-txt-muted uppercase tracking-widest text-center mt-1">por dia</div>
+                </div>
+              </div>
+            )}
 
             {/* 2. Seção Secundária: HLTB (Compacta) */}
             <div className="bg-dark-900/50 border border-white/5 rounded-[2.5rem] p-8 relative overflow-hidden">
