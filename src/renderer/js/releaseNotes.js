@@ -1,6 +1,6 @@
 export const releaseNotes = [
   {
-    version: "1.3.4",
+    version: "1.3.5",
     date: "2026-05-13",
     features: [
       "🌟 Padronização Visual Premium: As seções 'Foco Final' e 'Desenterrando da Fila' agora utilizam uma matriz quadrada 2x2 imersiva com cards customizados no estilo mini-banner.",
