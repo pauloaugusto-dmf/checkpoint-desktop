@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, PieChart, Clock, CheckCircle2, Gamepad2, Star, TrendingUp, Award } from 'lucide-react';
+import { BarChart3, PieChart, Clock, CheckCircle2, Gamepad2, Star, TrendingUp, Award, Trophy, Calendar } from 'lucide-react';
 
 export default function StatisticsView({ jogos, generos }) {
   // Cálculos Básicos
@@ -47,6 +47,20 @@ export default function StatisticsView({ jogos, generos }) {
   const mediaNota = jogosComNota.length > 0 
     ? (jogosComNota.reduce((acc, j) => acc + j.nota_pessoal, 0) / jogosComNota.length).toFixed(1)
     : '0.0';
+
+  // Jogos Zerados por Ano
+  const yearlyCompleted = {};
+  jogos.forEach(j => {
+    if (j.data_finalizacao && j.data_finalizacao.trim().length >= 4) {
+      const year = j.data_finalizacao.substring(0, 4);
+      if (/^\d{4}$/.test(year)) {
+        yearlyCompleted[year] = (yearlyCompleted[year] || 0) + 1;
+      }
+    }
+  });
+
+  const sortedYears = Object.entries(yearlyCompleted).sort(([a], [b]) => b.localeCompare(a));
+  const maxYearlyCount = sortedYears.length > 0 ? Math.max(...sortedYears.map(([, c]) => c)) : 1;
 
   return (
     <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-8 animate-in fade-in duration-500">
@@ -140,6 +154,50 @@ export default function StatisticsView({ jogos, generos }) {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Jogos Zerados por Ano */}
+        <div className="bg-dark-800 border border-dark-700 rounded-2xl p-6 shadow-xl lg:col-span-2">
+          <div className="flex items-center gap-3 mb-6">
+            <Trophy className="w-5 h-5 text-emerald-400" />
+            <div>
+              <h3 className="text-lg font-bold text-txt-main">Histórico de Conclusões por Ano</h3>
+              <p className="text-xs text-txt-muted">Evolução de jogos zerados ao longo do tempo</p>
+            </div>
+          </div>
+          
+          {sortedYears.length > 0 ? (
+            <div className="space-y-4">
+              {sortedYears.map(([year, count]) => {
+                const percent = (count / maxYearlyCount) * 100;
+                return (
+                  <div key={year} className="space-y-1.5">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="font-bold text-txt-main flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                        {year}
+                      </span>
+                      <span className="font-black text-emerald-400">
+                        {count} {count === 1 ? 'jogo finalizado' : 'jogos finalizados'}
+                      </span>
+                    </div>
+                    <div className="h-3 bg-dark-900 rounded-lg overflow-hidden border border-dark-700">
+                      <div 
+                        className="h-full bg-gradient-to-r from-emerald-600 to-teal-400 transition-all duration-1000 ease-out rounded-lg"
+                        style={{ width: `${percent}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-8 flex flex-col items-center justify-center text-txt-muted italic text-center space-y-2">
+              <Trophy className="w-8 h-8 opacity-30 text-emerald-400" />
+              <p>Nenhum jogo com data de conclusão cadastrada ainda.</p>
+              <p className="text-xs text-txt-muted/70">Ao marcar jogos como Completados, preencha a Data de Conclusão para ver seu histórico aqui.</p>
+            </div>
+          )}
         </div>
       </div>
       

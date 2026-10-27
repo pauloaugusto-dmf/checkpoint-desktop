@@ -39,13 +39,17 @@ async function initDatabase() {
           nota_metacritic INTEGER DEFAULT 0,
           tempo_estimado_hltb INTEGER DEFAULT 0,
           hltb_main_extra INTEGER DEFAULT 0,
-          hltb_completionist INTEGER DEFAULT 0
+          hltb_completionist INTEGER DEFAULT 0,
+          data_finalizacao TEXT
         );
       `);
 
       const columns = await dbInstance.all("PRAGMA table_info(jogos)");
       const columnNames = columns.map(c => c.name);
 
+      if (!columnNames.includes('data_finalizacao')) {
+        await dbInstance.run("ALTER TABLE jogos ADD COLUMN data_finalizacao TEXT;");
+      }
       if (!columnNames.includes('hltb_main_extra')) {
         await dbInstance.run("ALTER TABLE jogos ADD COLUMN hltb_main_extra INTEGER DEFAULT 0;");
       }
@@ -291,15 +295,16 @@ const addJogo = async (jogo) => {
       tempo_jogo_minutos, percentual_conclusao, 
       data_lancamento, capa_caminho, banner_caminho,
       nota_metacritic, tempo_estimado_hltb,
-      hltb_main_extra, hltb_completionist
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      hltb_main_extra, hltb_completionist, data_finalizacao
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     jogo.titulo, jogo.plataforma || null, jogo.status,
     jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0,
     jogo.percentual_conclusao || 0, jogo.data_lancamento || null,
     jogo.capa_caminho || null, jogo.banner_caminho || null,
     jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0,
-    jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0
+    jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0,
+    jogo.data_finalizacao || null
   ]);
 
   
@@ -324,7 +329,8 @@ const updateJogo = async (id, jogo) => {
         percentual_conclusao = ?, data_lancamento = ?, 
         capa_caminho = ?, banner_caminho = ?,
         nota_metacritic = ?, tempo_estimado_hltb = ?,
-        hltb_main_extra = ?, hltb_completionist = ?
+        hltb_main_extra = ?, hltb_completionist = ?,
+        data_finalizacao = ?
     WHERE id = ?
   `, [
     jogo.titulo, jogo.plataforma || null, jogo.status,
@@ -332,7 +338,8 @@ const updateJogo = async (id, jogo) => {
     jogo.percentual_conclusao || 0, jogo.data_lancamento || null,
     jogo.capa_caminho || null, jogo.banner_caminho || null,
     jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0,
-    jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0, id
+    jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0,
+    jogo.data_finalizacao || null, id
   ]);
 
 
@@ -420,7 +427,7 @@ const importData = async (data) => {
     const sourceGeneros = data.generos || data.tags || []; // Suporte para backup com tags
     
     for (const gen of sourceGeneros) {
-      const result = await dbInstance.run('INSERT INTO generos (nome) VALUES (?)', gen.nome);
+      const result = await dbInstance.run('INSERT INTO generos (nome, cor) VALUES (?, ?)', [gen.nome, gen.cor || null]);
       genMap[gen.id] = result.lastID;
     }
 
@@ -432,16 +439,17 @@ const importData = async (data) => {
             tempo_jogo_minutos, percentual_conclusao, 
             data_lancamento, capa_caminho, banner_caminho, 
             nota_metacritic, tempo_estimado_hltb,
-            hltb_main_extra, hltb_completionist
+            hltb_main_extra, hltb_completionist, data_finalizacao
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           jogo.titulo, jogo.plataforma || null, jogo.status, 
           jogo.nota_pessoal || 0, jogo.tempo_jogo_minutos || 0, 
           jogo.percentual_conclusao || 0, jogo.data_lancamento || null, 
           jogo.capa_caminho || null, jogo.banner_caminho || null,
           jogo.nota_metacritic || 0, jogo.tempo_estimado_hltb || 0,
-          jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0
+          jogo.hltb_main_extra || 0, jogo.hltb_completionist || 0,
+          jogo.data_finalizacao || null
         ]);
 
         

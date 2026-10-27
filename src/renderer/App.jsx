@@ -12,6 +12,7 @@ import CalendarView from './components/CalendarView';
 import SettingsView from './components/SettingsView';
 import StatisticsView from './components/StatisticsView';
 import DashboardView from './components/DashboardView';
+import CompletedByYearView from './components/CompletedByYearView';
 
 // Modais
 import GameModal from './components/GameModal';
@@ -229,6 +230,7 @@ export default function App() {
         if (sortBy === 'score') return (b.nota_pessoal || 0) - (a.nota_pessoal || 0);
         if (sortBy === 'progress') return (b.percentual_conclusao || 0) - (a.percentual_conclusao || 0);
         if (sortBy === 'time') return (b.tempo_jogo_minutos || 0) - (a.tempo_jogo_minutos || 0);
+        if (sortBy === 'completion-date') return (b.data_finalizacao || '').localeCompare(a.data_finalizacao || '');
         return b.id - a.id;
       });
   }, [jogos, activeFilter, searchTerm, filterStatus, filterGenero, sortBy]);
@@ -283,6 +285,14 @@ export default function App() {
         );
       case 'Estatísticas':
         return <StatisticsView jogos={jogos} generos={generos} />;
+      case 'Zerados por Ano':
+        return (
+          <CompletedByYearView 
+            jogos={jogos}
+            onGameClick={handleGameClick}
+            getIconColorClass={getIconColorClass}
+          />
+        );
       default:
         return (
           <div className="flex-1 overflow-y-auto p-8 relative flex flex-col gap-8 custom-scrollbar">

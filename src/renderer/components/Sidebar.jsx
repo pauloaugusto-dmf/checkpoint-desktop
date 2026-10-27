@@ -1,5 +1,5 @@
 import React from 'react';
-import { Gamepad2, LayoutGrid, Pause, Archive, CheckCircle2, ListMinus, Library, CalendarDays, BarChart3, Settings, Sparkles, TrendingUp, Star, Clock, ChevronLeft, ChevronRight, ChevronDown, Home } from 'lucide-react';
+import { Gamepad2, LayoutGrid, Pause, Archive, CheckCircle2, ListMinus, Library, CalendarDays, BarChart3, Settings, Sparkles, TrendingUp, Star, Clock, ChevronLeft, ChevronRight, ChevronDown, Home, Trophy } from 'lucide-react';
 import NavItem from './NavItem';
 
 export default function Sidebar({ 
@@ -19,6 +19,7 @@ export default function Sidebar({
     'Pausado': <Pause />,
     'Backlog': <Archive />,
     'Completado': <CheckCircle2 />,
+    'Zerados por Ano': <Trophy />,
     'Abandonado': <ListMinus />,
     'Lista de Desejos': <Library />,
     'Calendário': <CalendarDays />,
@@ -168,6 +169,14 @@ export default function Sidebar({
                 onClick={() => setActiveFilter('Para Terminar')} 
                 isCollapsed={isCollapsed}
                 colorClass="text-blue-400"
+              />
+              <NavItem 
+                icon={menuIcons['Zerados por Ano']} 
+                label="Zerados por Ano" 
+                active={activeFilter === 'Zerados por Ano'} 
+                onClick={() => setActiveFilter('Zerados por Ano')} 
+                isCollapsed={isCollapsed}
+                colorClass="text-emerald-400"
               />
               <NavItem 
                 icon={<Star className="w-5 h-5" />} 

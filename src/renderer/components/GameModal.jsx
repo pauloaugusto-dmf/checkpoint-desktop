@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Trash2, X, Plus, Tag as TagIcon, Search, Loader2 } from 'lucide-react';
+import { Trash2, X, Plus, Tag as TagIcon, Search, Loader2, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { platforms } from '../js/platforms';
+import { getLocalDateString } from '../js/dateUtils';
 
 const GenreButton = React.memo(({ gen, isSelected, onToggle }) => {
   return (
@@ -42,6 +43,7 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
     nota_pessoal: 0,
     percentual_conclusao: 0,
     data_lancamento: '',
+    data_finalizacao: '',
     capa_caminho: '',
     banner_caminho: '',
     tempo_estimado_hltb: 0,
@@ -59,6 +61,8 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
         titulo: initialData.titulo || '',
         plataforma: String(initialData.plataforma || ''),
         status: initialData.status || 'Lista de Desejos',
+        data_lancamento: initialData.data_lancamento || '',
+        data_finalizacao: initialData.data_finalizacao || '',
         hltb_horas: Math.floor((initialData.tempo_estimado_hltb || 0) / 60),
         hltb_minutos: (initialData.tempo_estimado_hltb || 0) % 60,
         tempo_horas: Math.floor((initialData.tempo_jogo_minutos || 0) / 60),
@@ -74,6 +78,7 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
         nota_pessoal: 0,
         percentual_conclusao: 0,
         data_lancamento: '',
+        data_finalizacao: '',
         capa_caminho: '',
         banner_caminho: '',
         tempo_estimado_hltb: 0,
@@ -159,10 +164,28 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
   };
 
   const handleChange = (e) => {
-
     const { name, value } = e.target;
     setFormData(prev => {
       const newState = { ...prev, [name]: value };
+      
+      // Auto preenchimento da data de finalização ao marcar como Completado
+      if (name === 'status' && value === 'Completado') {
+        if (!prev.data_finalizacao) {
+          newState.data_finalizacao = getLocalDateString();
+        }
+        if (!prev.percentual_conclusao || prev.percentual_conclusao < 100) {
+          newState.percentual_conclusao = 100;
+        }
+      }
+
+      // Se preencher a data de finalização, sugere status Completado se não estiver
+      if (name === 'data_finalizacao' && value && prev.status !== 'Completado') {
+        newState.status = 'Completado';
+        if (!prev.percentual_conclusao || prev.percentual_conclusao < 100) {
+          newState.percentual_conclusao = 100;
+        }
+      }
+
       if (name === 'tempo_horas' || name === 'tempo_minutos') {
         const h = parseInt(name === 'tempo_horas' ? value : prev.tempo_horas) || 0;
         const m = parseInt(name === 'tempo_minutos' ? value : prev.tempo_minutos) || 0;
@@ -175,7 +198,6 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
       }
       return newState;
     });
-
   };
 
   const handleSubmit = (e) => {
@@ -187,10 +209,10 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
       tempo_jogo_minutos: parseInt(formData.tempo_jogo_minutos) || 0,
       percentual_conclusao: parseFloat(formData.percentual_conclusao) || 0,
       nota_metacritic: parseInt(formData.nota_metacritic) || 0,
-      tempo_estimado_hltb: parseInt(formData.tempo_estimado_hltb) || 0
+      tempo_estimado_hltb: parseInt(formData.tempo_estimado_hltb) || 0,
+      data_finalizacao: formData.data_finalizacao || null
     };
     onSave(jogoFinal);
-
   };
 
   // Otimização: Lista filtrada de gêneros para o seletor
@@ -240,7 +262,27 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-txt-muted mb-1">Status</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-txt-muted">Status</label>
+                {formData.status !== 'Completado' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData(prev => ({
+                        ...prev,
+                        status: 'Completado',
+                        data_finalizacao: getLocalDateString(),
+                        percentual_conclusao: (!prev.percentual_conclusao || prev.percentual_conclusao < 100) ? 100 : prev.percentual_conclusao
+                      }));
+                      toast.success('Jogo marcado como Completado hoje!');
+                    }}
+                    className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 hover:bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 transition-all cursor-pointer"
+                  >
+                    <Trophy className="w-3 h-3" />
+                    Finalizar Hoje
+                  </button>
+                )}
+              </div>
               <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500">
                 <option value="Jogando">Jogando</option>
                 <option value="Pausado">Pausado</option>
@@ -373,6 +415,45 @@ export default function GameModal({ onClose, onSave, onDelete, initialData }) {
                 type="date" 
                 name="data_lancamento" 
                 value={formData.data_lancamento || ''} 
+                onChange={handleChange} 
+                onClick={(e) => e.target.showPicker?.()}
+                className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500 [color-scheme:dark] cursor-pointer" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-txt-muted mb-1 flex items-center justify-between">
+                <span>Data de Conclusão</span>
+                <div className="flex items-center gap-2">
+                  {!formData.data_finalizacao && (
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData(prev => ({ 
+                        ...prev, 
+                        status: 'Completado', 
+                        data_finalizacao: getLocalDateString(),
+                        percentual_conclusao: (!prev.percentual_conclusao || prev.percentual_conclusao < 100) ? 100 : prev.percentual_conclusao
+                      }))}
+                      className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold transition-colors cursor-pointer"
+                    >
+                      Hoje
+                    </button>
+                  )}
+                  {formData.data_finalizacao && (
+                    <button 
+                      type="button" 
+                      onClick={() => setFormData(prev => ({ ...prev, data_finalizacao: '' }))}
+                      className="text-[10px] text-txt-muted hover:text-red-400 font-medium transition-colors"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+              </label>
+              <input 
+                type="date" 
+                name="data_finalizacao" 
+                value={formData.data_finalizacao || ''} 
                 onChange={handleChange} 
                 onClick={(e) => e.target.showPicker?.()}
                 className="w-full bg-dark-900 border border-dark-600 rounded-lg px-4 py-2 text-txt-main focus:outline-none focus:border-primary-500 [color-scheme:dark] cursor-pointer" 

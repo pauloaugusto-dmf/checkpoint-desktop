@@ -3,7 +3,7 @@ import { X, Calendar, Clock, Star, Gamepad2, CheckCircle2, ListMinus, Library, A
 import { toast } from 'sonner';
 
 import { platforms } from '../js/platforms';
-import { calculateDaysLeft } from '../js/dateUtils';
+import { calculateDaysLeft, getLocalDateString } from '../js/dateUtils';
 
 export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon, iconColorClass, proximoLancamento }) {
   const [isSyncing, setIsSyncing] = useState(false);
@@ -40,6 +40,21 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
     }
   };
 
+  const handleFinishGame = async () => {
+    try {
+      const hoje = getLocalDateString();
+      await onUpdate(jogo.id, {
+        status: 'Completado',
+        data_finalizacao: hoje,
+        percentual_conclusao: (jogo.percentual_conclusao && jogo.percentual_conclusao >= 100) ? jogo.percentual_conclusao : 100
+      });
+      toast.success(`Parabéns! "${jogo.titulo}" marcado como finalizado hoje!`);
+    } catch (err) {
+      console.error('Erro ao finalizar jogo:', err);
+      toast.error('Erro ao marcar jogo como finalizado.');
+    }
+  };
+
   const formatTime = (min) => {
     if (!min || isNaN(min)) return '--';
     const h = Math.floor(min / 60);
@@ -59,8 +74,12 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
   const plataformaObj = platforms.find(p => p.id === jogo.plataforma);
 
   const formattedDate = jogo.data_lancamento 
-    ? new Date(jogo.data_lancamento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+    ? new Date(jogo.data_lancamento + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
     : 'Data não definida';
+
+  const formattedFinalizacaoDate = jogo.data_finalizacao 
+    ? new Date(jogo.data_finalizacao + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+    : null;
 
   const horas = Math.floor((jogo.tempo_jogo_minutos || 0) / 60);
   const minutos = (jogo.tempo_jogo_minutos || 0) % 60;
@@ -139,21 +158,51 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
                   </div>
                 </div>
               </div>
+
+              {jogo.data_finalizacao && (
+                <div className="flex items-center gap-4 bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 hover:bg-emerald-500/15 transition-colors">
+                  <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400">
+                    <Trophy size={20} />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Finalizado em</div>
+                    <div className="text-sm font-black text-white">{formattedFinalizacaoDate}</div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="mt-auto pt-8 flex gap-3">
-              <button 
-                onClick={onEdit}
-                className="flex-1 bg-primary-600 hover:bg-primary-500 text-white py-4 rounded-2xl transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest shadow-lg shadow-primary-600/20 active:scale-95"
-              >
-                <Edit3 size={16} /> Editar
-              </button>
-              <button 
-                onClick={onClose}
-                className="p-4 bg-dark-700 hover:bg-dark-600 text-white rounded-2xl transition-all border border-white/5 active:scale-95"
-              >
-                <X size={20} />
-              </button>
+            <div className="mt-auto pt-8 flex flex-col gap-2.5">
+              {jogo.status !== 'Completado' ? (
+                <button 
+                  onClick={handleFinishGame}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest shadow-lg shadow-emerald-600/25 active:scale-95 border border-emerald-400/20"
+                >
+                  <Trophy size={16} /> Finalizar Jogo
+                </button>
+              ) : !jogo.data_finalizacao && (
+                <button 
+                  onClick={handleFinishGame}
+                  className="w-full bg-emerald-600/80 hover:bg-emerald-600 text-white py-3 rounded-2xl transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest border border-emerald-400/20 active:scale-95"
+                >
+                  <Trophy size={16} /> Definir Finalizado Hoje
+                </button>
+              )}
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={onEdit}
+                  className="flex-1 bg-primary-600 hover:bg-primary-500 text-white py-4 rounded-2xl transition-all flex items-center justify-center gap-2 font-black text-xs uppercase tracking-widest shadow-lg shadow-primary-600/20 active:scale-95"
+                >
+                  <Edit3 size={16} /> Editar
+                </button>
+                <button 
+                  onClick={onClose}
+                  className="p-4 bg-dark-700 hover:bg-dark-600 text-white rounded-2xl transition-all border border-white/5 active:scale-95"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -180,11 +229,20 @@ export default function GameDetailsModal({ jogo, onClose, onEdit, onUpdate, icon
               <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none mb-4 drop-shadow-2xl">
                 {jogo.titulo}
               </h1>
-              <div className="flex items-center gap-6 text-xs font-bold text-white/50 tracking-wide uppercase">
+              <div className="flex flex-wrap items-center gap-4 md:gap-6 text-xs font-bold text-white/50 tracking-wide uppercase">
                 <div className="flex items-center gap-2">
                   <Calendar size={14} className="text-primary-500" />
                   {formattedDate}
                 </div>
+                {formattedFinalizacaoDate && (
+                  <>
+                    <div className="w-1.5 h-1.5 bg-white/10 rounded-full" />
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <Trophy size={14} className="text-emerald-400" />
+                      <span>Zerado: {formattedFinalizacaoDate}</span>
+                    </div>
+                  </>
+                )}
                 <div className="w-1.5 h-1.5 bg-white/10 rounded-full" />
                 <div className="flex items-center gap-2">
                   <Star size={14} className="text-amber-500" fill="currentColor" />

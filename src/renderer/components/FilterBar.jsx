@@ -73,6 +73,7 @@ const FilterBar = memo(function FilterBar({
           className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-2 text-sm text-txt-main focus:outline-none focus:ring-2 focus:ring-primary-500/50 cursor-pointer"
         >
           <option value="recent">Mais Recentes</option>
+          <option value="completion-date">Data de Conclusão</option>
           <option value="alpha">A-Z</option>
           <option value="score">Maior Nota</option>
           <option value="progress">Progresso (%)</option>
